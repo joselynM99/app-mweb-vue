@@ -56,24 +56,25 @@ const AppSidebarNav = defineComponent({
       firstRender.value = false
     })
 
-    const renderItem = (item) => {
+    const renderItem = (item, isChild = false) => {
       if (item.items) {
         return h(
           CNavGroup,
           {
             as: 'div',
             compact: true,
+            style: isChild ? 'margin-left: 20px;' : '', // Aplicar margen izquierdo si es un submenú
             ...(firstRender.value && {
               visible: item.items.some((child) => isActiveItem(route, child)),
             }),
           },
           {
             togglerContent: () => [
-              h('i', { class: `${item.icon} nav-icon` }), // Renderizar el icono como una clase de FA
+              h('i', { class: `${item.icon} nav-icon`, style: 'width: 24px; height: 24px;' }), // Fijar tamaño del ícono
               item.name,
             ],
-            default: () => item.items.map((child) => renderItem(child)),
-          },
+            default: () => item.items.map((child) => renderItem(child, true)),  // Pasar `true` para identificar los submenús
+          }
         )
       }
 
@@ -92,13 +93,14 @@ const AppSidebarNav = defineComponent({
                     active: props.isActive,
                     as: 'div',
                     href: props.href,
+                    style: isChild ? 'margin-left: 20px;' : '',  // Aplicar margen izquierdo si es submenú
                     onClick: () => props.navigate(),
                   },
                   {
                     default: () => [
                       item.icon
-                        ? h('i', { class: `${item.icon} nav-icon` }) // Usar clases de FA directamente
-                        : h('span', { class: 'nav-icon' }, h('span', { class: 'nav-icon-bullet' })),
+                        ? h('i', { class: `${item.icon} nav-icon`, style: 'width: 24px; height: 24px;' }) // Fijar tamaño del ícono
+                        : h('span', { class: 'nav-icon', style: 'width: 24px;' }, h('span', { class: 'nav-icon-bullet' })),
                       item.name,
                       item.badge &&
                         h(
@@ -109,12 +111,12 @@ const AppSidebarNav = defineComponent({
                           },
                           {
                             default: () => item.badge.text,
-                          },
+                          }
                         ),
                     ],
-                  },
+                  }
                 ),
-            },
+            }
           )
         : h(
             resolveComponent(item.component),
@@ -123,7 +125,7 @@ const AppSidebarNav = defineComponent({
             },
             {
               default: () => item.name,
-            },
+            }
           )
     }
 

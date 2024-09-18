@@ -18,7 +18,7 @@ export const initKeycloak = (onAuthenticatedCallback) => {
             try {
               const usuario = await buscarUsuarioPorNombreUsuarioFachada(username);
               sessionStorage.setItem('usuario', JSON.stringify(usuario));
-              console.log(keycloak.token);
+              //console.log(keycloak.token);
 
               onAuthenticatedCallback();
             } catch (error) {

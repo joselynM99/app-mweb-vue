@@ -40,7 +40,7 @@
       <CWidgetStatsD
         color="warning"
         :values="[
-          { value: 'Cuadres Caja' },
+          { value: 'Cuadres de caja' },
         ]"
       >
         <template #icon>

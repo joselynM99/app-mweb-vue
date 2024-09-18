@@ -40,4 +40,9 @@ const sidebar = useSidebarStore()
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 
 }
+
+
+.submenu-item {
+  padding-left: 100px !important;
+}
 </style>
