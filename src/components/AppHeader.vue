@@ -6,16 +6,16 @@ import AppBreadcrumb from '@/components/AppBreadcrumb.vue'
 import AppHeaderDropdownAccnt from '@/components/AppHeaderDropdownAccnt.vue'
 import { useSidebarStore } from '@/stores/sidebar.js'
 
-const headerClassNames = ref('mb-4 p-0')
+const headerClassNames = ref('mb-2 p-0')
 const { colorMode, setColorMode } = useColorModes('coreui-free-vue-admin-template-theme')
 const sidebar = useSidebarStore()
 
 onMounted(() => {
   document.addEventListener('scroll', () => {
     if (document.documentElement.scrollTop > 0) {
-      headerClassNames.value = 'mb-4 p-0 shadow-sm'
+      headerClassNames.value = 'mb-2 p-0 shadow-sm'
     } else {
-      headerClassNames.value = 'mb-4 p-0'
+      headerClassNames.value = 'mb-2 p-0'
     }
   })
 })
@@ -23,8 +23,8 @@ onMounted(() => {
 
 <template>
   <CHeader position="sticky" :class="headerClassNames">
-    <CContainer class="border-bottom px-4" fluid>
-      <CHeaderToggler @click="sidebar.toggleVisible()" style="margin-inline-start: -14px">
+    <CContainer class="border-bottom px-4" style="width: 100%; max-width: 100vw; padding-top: 8px;">
+      <CHeaderToggler @click="sidebar.toggleVisible()" style="margin-inline-start: -15px">
         <CIcon icon="cil-menu" size="lg" />
       </CHeaderToggler>
       <CHeaderNav class="d-none d-md-flex">
@@ -37,6 +37,7 @@ onMounted(() => {
       <CHeaderNav class="ms-auto">
       </CHeaderNav>
       <CHeaderNav>
+
         <li class="nav-item py-1">
           <div class="vr h-100 mx-2 text-body text-opacity-75"></div>
         </li>
@@ -47,31 +48,16 @@ onMounted(() => {
             <CIcon v-else icon="cil-contrast" size="lg" />
           </CDropdownToggle>
           <CDropdownMenu>
-            <CDropdownItem
-              :active="colorMode === 'light'"
-              class="d-flex align-items-center"
-              component="button"
-              type="button"
-              @click="setColorMode('light')"
-            >
+            <CDropdownItem :active="colorMode === 'light'" class="d-flex align-items-center" component="button"
+              type="button" @click="setColorMode('light')">
               <CIcon class="me-2" icon="cil-sun" size="lg" /> Light
             </CDropdownItem>
-            <CDropdownItem
-              :active="colorMode === 'dark'"
-              class="d-flex align-items-center"
-              component="button"
-              type="button"
-              @click="setColorMode('dark')"
-            >
+            <CDropdownItem :active="colorMode === 'dark'" class="d-flex align-items-center" component="button"
+              type="button" @click="setColorMode('dark')">
               <CIcon class="me-2" icon="cil-moon" size="lg" /> Dark
             </CDropdownItem>
-            <CDropdownItem
-              :active="colorMode === 'auto'"
-              class="d-flex align-items-center"
-              component="button"
-              type="button"
-              @click="setColorMode('auto')"
-            >
+            <CDropdownItem :active="colorMode === 'auto'" class="d-flex align-items-center" component="button"
+              type="button" @click="setColorMode('auto')">
               <CIcon class="me-2" icon="cil-contrast" size="lg" /> Auto
             </CDropdownItem>
           </CDropdownMenu>
@@ -82,8 +68,23 @@ onMounted(() => {
         <AppHeaderDropdownAccnt />
       </CHeaderNav>
     </CContainer>
-    <CContainer class="px-4" fluid>
+    <CContainer class="border-bottom px-4" style="width: 100%; max-width: 100vw; padding: 10px;">
       <AppBreadcrumb />
     </CContainer>
   </CHeader>
 </template>
+<style scoped>
+.dropdown-item:hover {
+  background-color: #42b883;
+  color: white;
+  cursor: pointer;
+}
+
+
+.dropdown-item.active,
+.dropdown-item:active {
+  background-color: #42b883 !important;
+  color: white;
+  cursor: pointer;
+}
+</style>

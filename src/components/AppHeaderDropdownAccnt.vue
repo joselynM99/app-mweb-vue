@@ -16,7 +16,7 @@ export default {
       KeycloakService.logout();
     },
     goToProfile() {
-      this.$router.push({ path: '/negocio/actualizar-usuario', query: { username: this.username } });
+      this.$router.push({ path: '/actualizar-usuario', query: { username: this.username } });
     }
   }
 };
@@ -32,7 +32,7 @@ export default {
     </CDropdownToggle>
     <CDropdownMenu class="pt-0">
       <CDropdownItem @click="goToProfile">
-        <CIcon icon="cil-user" /> Perfil
+        <CIcon icon="cil-user" /> Perfil de usuario
       </CDropdownItem>
       <CDropdownItem @click="logout">
         <CIcon icon="cil-lock-locked" /> Cerrar sesión
@@ -57,4 +57,13 @@ export default {
   color: white;
   cursor: pointer;
 }
+
+
+.dropdown-item.active,
+.dropdown-item:active {
+  background-color: #42b883 !important;
+  color: white;
+  cursor: pointer;
+}
+
 </style>

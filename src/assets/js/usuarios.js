@@ -24,6 +24,11 @@ export const buscarUsuarioPorNombreUsuarioFachada = async (username) => {
   return await buscarUsuarioPorNombreUsuario(username);
 };
 
+export const buscarUsuarioPorNombreUsuarioNegocioFachada = async (username, idNegocio) => {
+  return await buscarUsuarioPorNombreUsuarioNegocio(username, idNegocio);
+};
+
+
 export const crearUsuarioFachada = async (usuarioDTO) => {
   return await crearUsuario(usuarioDTO);
 };
@@ -32,8 +37,8 @@ export const listarUsuariosPorNegocioFachada = async (negocioId) => {
   return await listarUsuariosPorNegocio(negocioId);
 };
 
-export const eliminarUsuarioFachada = async (usuarioId) => {
-  return await eliminarUsuario(usuarioId);
+export const eliminarUsuarioFachada = async (usuarioId, idNegocio) => {
+  return await eliminarUsuario(usuarioId, idNegocio);
 };
 
 export const listarRolesFachada = async () => {
@@ -52,6 +57,12 @@ const buscarUsuarioPorNombreUsuario = async (username) => {
   }).then(r => r.data);
 };
 
+const buscarUsuarioPorNombreUsuarioNegocio = async (username, idNegocio) => {
+  return apiClient.get('/usuarios/buscarPorNegocio', {
+    params: { username, idNegocio }
+  }).then(r => r.data);
+};
+
 const crearUsuario = async (usuarioDTO) => {
   return apiClient.post('/usuarios', usuarioDTO).then(r => r.data);
 };
@@ -60,10 +71,12 @@ const listarUsuariosPorNegocio = async (negocioId) => {
   return apiClient.get(`/${negocioId}/usuarios`).then(r => r.data);
 };
 
-const eliminarUsuario = async (usuarioId) => {
-  return apiClient.delete(`/usuarios/${usuarioId}`).then(r => r.data);
-};
+const eliminarUsuario = async (usuarioId, idNegocio) => {
+  return apiClient.delete(`/usuarios/${usuarioId}`, {
+    params: { idNegocio }
+  }).then(r => r.data);
 
+};
 const listarRoles = async () => {
   return apiClient.get('/roles').then(r => r.data);
 };

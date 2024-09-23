@@ -11,10 +11,10 @@ import DocsExample from '@/components/DocsExample';
 import { initKeycloak } from '@/assets/js/keycloak';
 import '@fortawesome/fontawesome-free/css/all.css'; // Importa los estilos de Font Awesome
 
+
 const app = createApp(App);
 
 initKeycloak(() => {
-
   app.use(createPinia());
   app.use(router);
   app.use(CoreuiVue);
@@ -23,6 +23,4 @@ initKeycloak(() => {
   app.component('DocsExample', DocsExample);
 
   app.mount('#app');
-
-
 });

@@ -13,25 +13,25 @@ export default [
   {
     component: 'CNavItem',
     name: 'Usuarios',
-    to: '/negocio/usuarios',
+    to: '/usuarios',
     icon: 'fas fa-users', // Icono de usuarios
     items: [
       {
         component: 'CNavItem',
         name: 'Lista',
-        to: '/negocio/usuarios',
+        to: '/usuarios',
         icon: 'fas fa-list', // Lista
       },
       {
         component: 'CNavItem',
         name: 'Registrar',
-        to: '/negocio/agregar-usuario',
+        to: '/usuarios/agregar',
         icon: 'fas fa-user-plus', // Registrar usuario
       },
       {
         component: 'CNavItem',
         name: 'Actualizar',
-        to: '/negocio/actualizar-usuario',
+        to: '/usuarios/actualizar',
         icon: 'fas fa-user-edit', // Editar usuario
       },
     ],
@@ -45,25 +45,25 @@ export default [
   {
     component: 'CNavItem',
     name: 'Clientes',
-    to: '/inventario/clientes',
+    to: '/clientes',
     icon: 'fas fa-address-book', // Libreta de contactos para clientes
     items: [
       {
         component: 'CNavItem',
         name: 'Lista',
-        to: '/inventario/clientes',
+        to: '/clientes',
         icon: 'fas fa-list', // Lista
       },
       {
         component: 'CNavItem',
         name: 'Registrar',
-        to: '/inventario/agregar-cliente',
+        to: '/clientes/agregar',
         icon: 'fas fa-user-check', // Registrar cliente
       },
       {
         component: 'CNavItem',
         name: 'Actualizar',
-        to: '/negocio/actualizar-cliente',
+        to: '/clientes/actualizar',
         icon: 'fas fa-user-edit', // Actualizar cliente
       },
     ],
@@ -87,7 +87,7 @@ export default [
       {
         component: 'CNavItem',
         name: 'Registrar',
-        to: '/inventario/agregar-producto',
+        to: '/inventario/productos/agregar',
         icon: 'fas fa-plus-square', // Registrar producto
       },
       {
@@ -139,13 +139,13 @@ export default [
       {
         component: 'CNavItem',
         name: 'Registrar',
-        to: '/inventario/agregar-proveedor',
+        to: '/inventario/proveedores/agregar',
         icon: 'fas fa-user-plus', // Registrar proveedor
       },
       {
         component: 'CNavItem',
         name: 'Actualizar',
-        to: '/negocio/actualizar-proveedor',
+        to: '/inventario/proveedores/actualizar',
         icon: 'fas fa-user-edit', // Actualizar proveedor
       },
     ],
@@ -155,52 +155,14 @@ export default [
     name: 'Categorías',
     to: '/inventario/categorias',
     icon: 'fas fa-tags', // Categorías
-    items: [
-      {
-        component: 'CNavItem',
-        name: 'Lista',
-        to: '/inventario/categorias',
-        icon: 'fas fa-list', // Lista
-      },
-      {
-        component: 'CNavItem',
-        name: 'Registrar',
-        to: '/inventario/agregar-categoria',
-        icon: 'fas fa-plus-square', // Registrar categoría
-      },
-      {
-        component: 'CNavItem',
-        name: 'Actualizar',
-        to: '/negocio/actualizar-categoria',
-        icon: 'fas fa-edit', // Actualizar categoría
-      },
-    ],
+
   },
   {
     component: 'CNavItem',
     name: 'Marcas',
     to: '/inventario/marcas',
     icon: 'fas fa-certificate', // Marcas
-    items: [
-      {
-        component: 'CNavItem',
-        name: 'Lista',
-        to: '/inventario/marcas',
-        icon: 'fas fa-list', // Lista
-      },
-      {
-        component: 'CNavItem',
-        name: 'Registrar',
-        to: '/inventario/agregar-marca',
-        icon: 'fas fa-plus-square', // Registrar marca
-      },
-      {
-        component: 'CNavItem',
-        name: 'Actualizar',
-        to: '/negocio/actualizar-marca',
-        icon: 'fas fa-edit', // Actualizar marca
-      },
-    ],
+    
   },
   {
     component: 'CNavTitle',

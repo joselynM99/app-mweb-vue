@@ -4,7 +4,6 @@
       <CCard class="mb-4">
         <CCardHeader>
           <strong style="margin-right:5px;">Usuarios</strong>
-
           <CSpinner v-if="isLoading" color="success" class="spinner-border-sm" />
         </CCardHeader>
         <CCardBody>
@@ -12,10 +11,13 @@
             {{ error }}
           </CAlert>
           <div class="table-responsive">
-            <CTable v-if="usuarios.length > 0">
-              <CTableHead>
+            <div class="scroll-indicator">
+              <span class="arrow">←</span> Desliza para ver más <span class="arrow">→</span>
+            </div>
+            <CTable v-if="usuarios.length > 0" hover>
+              <CTableHead color="light">
                 <CTableRow>
-                  <CTableHeaderCell scope="col">Acciones</CTableHeaderCell>
+                  <CTableHeaderCell scope="col" class="text-center">Acciones</CTableHeaderCell>
                   <CTableHeaderCell scope="col">Nombre de Usuario</CTableHeaderCell>
                   <CTableHeaderCell scope="col">Correo</CTableHeaderCell>
                   <CTableHeaderCell scope="col">Rol</CTableHeaderCell>
@@ -26,12 +28,12 @@
               </CTableHead>
               <CTableBody>
                 <CTableRow v-for="usuario in usuarios" :key="usuario.id">
-                  <CTableDataCell>
+                  <CTableDataCell class="text-center">
                     <div class="action-buttons">
-                      <CButton color="info" @click="actualizarUsuario(usuario.nombreUsuario)">
+                      <CButton color="success" size="sm" @click="actualizarUsuario(usuario.nombreUsuario)">
                         <i class="fas fa-edit"></i>
                       </CButton>
-                      <CButton color="danger" @click="confirmarEliminacion(usuario)">
+                      <CButton color="danger" size="sm" @click="confirmarEliminacion(usuario)">
                         <i class="fas fa-trash-alt"></i>
                       </CButton>
                     </div>
@@ -42,11 +44,9 @@
                   <CTableDataCell class="text-wrap">{{ usuario.nombre }}</CTableDataCell>
                   <CTableDataCell class="text-wrap">{{ usuario.apellido }}</CTableDataCell>
                   <CTableDataCell class="text-wrap">{{ usuario.telefono }}</CTableDataCell>
-
                 </CTableRow>
               </CTableBody>
             </CTable>
-
           </div>
           <CAlert v-if="!usuarios.length && !error && !isLoading" color="info">
             No se encontraron usuarios para el negocio especificado.
@@ -114,7 +114,7 @@ export default {
     async eliminarUsuarioConfirmado() {
       this.isDeleting = true;
       try {
-        await eliminarUsuarioFachada(this.usuarioSeleccionado.keycloakId);
+        await eliminarUsuarioFachada(this.usuarioSeleccionado.keycloakId, JSON.parse(sessionStorage.getItem('usuario')).idNegocio);
         this.usuarios = this.usuarios.filter(usuario => usuario.id !== this.usuarioSeleccionado.id);
         this.visibleConfirmacion = false;
         this.usuarioSeleccionado = null;
@@ -126,7 +126,7 @@ export default {
       }
     },
     actualizarUsuario(nombreUsuario) {
-      this.$router.push({ path: '/negocio/actualizar-usuario', query: { username: nombreUsuario } });
+      this.$router.push({ path: '/actualizar-usuario', query: { username: nombreUsuario } });
     }
   }
 };
@@ -135,10 +135,12 @@ export default {
 <style scoped>
 .table-responsive {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
 }
 
 .text-wrap {
-  max-width: 150px; /* Ajusta este valor según tus necesidades */
+  max-width: 150px;
   word-wrap: break-word;
   white-space: normal;
 }
@@ -146,5 +148,45 @@ export default {
 .action-buttons {
   display: flex;
   gap: 5px;
+  justify-content: center;
+}
+
+.scroll-indicator {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .scroll-indicator {
+    display: block;
+    position: relative;
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #666;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    text-align: center;
+    margin-bottom: 10px;
+    border-radius: 5px;
+  }
+
+  .scroll-indicator .arrow {
+    font-size: 1rem;
+    margin: 0 5px;
+  }
+
+  .table-responsive::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 7px;
+    height: 7px;
+  }
+
+  .table-responsive::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, .5);
+    -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, .5);
+  }
+
+  CTableHeaderCell {
+    font-size: 0.9rem;
+  }
 }
 </style>

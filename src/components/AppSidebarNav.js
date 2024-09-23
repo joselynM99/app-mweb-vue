@@ -5,7 +5,6 @@ import nav from '@/_nav.js'
 import simplebar from 'simplebar-vue'
 import 'simplebar-vue/dist/simplebar.min.css'
 
-// Importar el componente FontAwesomeIcon
 import { FontAwesomeIcon } from '@fortawesome/fontawesome-free/css/all.css'
 
 const normalizePath = (path) =>
@@ -14,12 +13,8 @@ const normalizePath = (path) =>
     .replace(/(index)?\.(html)$/, '')
 
 const isActiveLink = (route, link) => {
-  if (link === undefined) {
+  if (!link) {
     return false
-  }
-
-  if (route.hash === link) {
-    return true
   }
 
   const currentPath = normalizePath(route.path)
@@ -46,7 +41,7 @@ const AppSidebarNav = defineComponent({
     CNavItem,
     CNavGroup,
     CNavTitle,
-    FontAwesomeIcon, // Asegurarse de que FontAwesomeIcon esté registrado
+    FontAwesomeIcon,
   },
   setup() {
     const route = useRoute()
@@ -63,70 +58,70 @@ const AppSidebarNav = defineComponent({
           {
             as: 'div',
             compact: true,
-            style: isChild ? 'margin-left: 20px;' : '', // Aplicar margen izquierdo si es un submenú
+            style: isChild ? 'margin-left: 20px;' : '',
             ...(firstRender.value && {
               visible: item.items.some((child) => isActiveItem(route, child)),
             }),
           },
           {
             togglerContent: () => [
-              h('i', { class: `${item.icon} nav-icon`, style: 'width: 24px; height: 24px;' }), // Fijar tamaño del ícono
+              h('i', { class: `${item.icon} nav-icon`, style: 'width: 24px; height: 24px;' }),
               item.name,
             ],
-            default: () => item.items.map((child) => renderItem(child, true)),  // Pasar `true` para identificar los submenús
+            default: () => item.items.map((child) => renderItem(child, true)),
           }
         )
       }
 
       return item.to
         ? h(
-            RouterLink,
-            {
-              to: item.to,
-              custom: true,
-            },
-            {
-              default: (props) =>
-                h(
-                  resolveComponent(item.component),
-                  {
-                    active: props.isActive,
-                    as: 'div',
-                    href: props.href,
-                    style: isChild ? 'margin-left: 20px;' : '',  // Aplicar margen izquierdo si es submenú
-                    onClick: () => props.navigate(),
-                  },
-                  {
-                    default: () => [
-                      item.icon
-                        ? h('i', { class: `${item.icon} nav-icon`, style: 'width: 24px; height: 24px;' }) // Fijar tamaño del ícono
-                        : h('span', { class: 'nav-icon', style: 'width: 24px;' }, h('span', { class: 'nav-icon-bullet' })),
-                      item.name,
-                      item.badge &&
-                        h(
-                          CBadge,
-                          {
-                            class: 'ms-auto',
-                            color: item.badge.color,
-                          },
-                          {
-                            default: () => item.badge.text,
-                          }
-                        ),
-                    ],
-                  }
-                ),
-            }
-          )
+          RouterLink,
+          {
+            to: item.to,
+            custom: true,
+          },
+          {
+            default: (props) =>
+              h(
+                resolveComponent(item.component),
+                {
+                  active: isActiveLink(route, item.to),
+                  as: 'div',
+                  href: props.href,
+                  style: isChild ? 'margin-left: 20px;' : '',
+                  onClick: () => props.navigate(),
+                },
+                {
+                  default: () => [
+                    item.icon
+                      ? h('i', { class: `${item.icon} nav-icon`, style: 'width: 24px; height: 24px;' })
+                      : h('span', { class: 'nav-icon', style: 'width: 24px;' }, h('span', { class: 'nav-icon-bullet' })),
+                    item.name,
+                    item.badge &&
+                    h(
+                      CBadge,
+                      {
+                        class: 'ms-auto',
+                        color: item.badge.color,
+                      },
+                      {
+                        default: () => item.badge.text,
+                      }
+                    ),
+                  ],
+                }
+              ),
+          }
+        )
         : h(
-            resolveComponent(item.component),
-            {
-              as: 'div',
-            },
-            {
-              default: () => item.name,
-            }
-          )
+          resolveComponent(item.component),
+          {
+            as: 'div',
+          },
+          {
+            default: () => item.name,
+          }
+        )
     }
 
     return () =>
