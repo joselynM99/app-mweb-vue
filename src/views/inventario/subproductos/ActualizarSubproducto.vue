@@ -26,8 +26,27 @@
               </CInputGroup>
               <div id="scanner-container" style="width: 100%; height: auto; display: none;"></div>
               <hr />
+              <div v-if="isLoadingListas" class="text-center mt-3">
+                <CSpinner color="success" />
+                <p>Cargando...</p>
+              </div>
               <CRow>
                 <CCol md="6">
+                  <div class="mb-2">
+                    <label for="codigoBarras" class="form-label">Código de Barras</label>
+                    <CInputGroup>
+                      <CInputGroupText><i class="fas fa-barcode"></i></CInputGroupText>
+                      <CFormInput id="codigoBarras" v-model="subproducto.codigoBarras" required />
+                      <CInputGroupText style="padding:0px 5px">
+                        <button @click="abrirCamara('subproducto')"
+                          style="border: none; background: none; margin:0px; padding:5px" type="button">
+                          <i class="fas fa-camera"></i>
+                        </button>
+                      </CInputGroupText>
+                      <div class="invalid-feedback">El código de barras es obligatorio</div>
+                    </CInputGroup>
+                  </div>
+
                   <div class="mb-2">
                     <label for="nombre" class="form-label">Nombre</label>
                     <CInputGroup>
@@ -154,7 +173,7 @@
                   <CSpinner v-if="isLoading" color="light" class="spinner-border-sm" />
                 </CButton>
               </div>
-              <div v-if="subproducto.producto && subproducto.cantidadRelacionada">
+              <div v-if="subproducto.producto && subproducto.x && productoSeleccionado">
                 <p>{{ subproducto.cantidadRelacionada }} {{ subproducto.nombre }} equivale a 1 {{
                   productoSeleccionado.nombre }}</p>
               </div>
@@ -249,12 +268,16 @@ export default {
       this.successMessage = '';
       try {
         const subproductoData = await obtenerSubproductoCodigoBarrasFachada(this.searchCodigoBarras, this.negocioId);
-        this.subproducto = { ...subproductoData };
-        this.productoSeleccionado = await obtenerProductoCodigoBarrasFachada(this.subproducto.producto, this.negocioId);
-        this.calcularCostoPromedioSubproducto();
-        this.calcularStockSubproducto();
-        this.successMessage = '';
-        this.errorMessage = '';
+        if (subproductoData) {
+          this.subproducto = { ...subproductoData };
+          this.productoSeleccionado = await obtenerProductoCodigoBarrasFachada(this.subproducto.producto, this.negocioId);
+          this.calcularCostoPromedioSubproducto();
+          this.calcularStockSubproducto();
+          this.successMessage = '';
+          this.errorMessage = '';
+        } else {
+          this.errorMessage = 'Subproducto no encontrado';
+        }
       } catch (error) {
         if (error.response && error.response.status === 404) {
           this.errorMessage = 'Subproducto no encontrado';
@@ -361,14 +384,13 @@ export default {
 
     async obtenerCostoPromedioProducto() {
       try {
-        console.log("codigo", this.subproducto.producto);
-
         const producto = await obtenerProductoCodigoBarrasFachada(this.subproducto.producto, this.negocioId);
         this.productoSeleccionado = producto;
         this.calcularCostoPromedioSubproducto();
         this.calcularStockSubproducto();
       } catch (error) {
         console.error('Error al obtener costo promedio del producto:', error);
+        this.productoSeleccionado = null; // Asegúrate de que productoSeleccionado sea null en caso de error
       }
     },
 
@@ -381,27 +403,36 @@ export default {
       this.calcularStockSubproducto();
     },
 
-    calcularCostoPromedioSubproducto() {
+    calcularStockSubproducto() {
+      if (!this.productoSeleccionado) {
+        this.subproducto.stockActual = 0;
+        return;
+      }
+
       const cantidadRelacionada = parseFloat(this.subproducto.cantidadRelacionada) || 0;
-      const costoPromedioProducto = parseFloat(this.productoSeleccionado.costoPromedio) || 0;
-      console.log("cantidadRelacionada", cantidadRelacionada);
-      console.log("costoPromedioProducto", costoPromedioProducto);
+      const stockProducto = parseInt(this.productoSeleccionado?.stockActual) || 0;
+      if (cantidadRelacionada > 0) {
+        this.subproducto.stockActual = Math.floor(stockProducto * cantidadRelacionada);
+      } else {
+        this.subproducto.stockActual = 0;
+      }
+    },
+
+    calcularCostoPromedioSubproducto() {
+      if (!this.productoSeleccionado) {
+        this.subproducto.costoPromedio = 0;
+        return;
+      }
+
+      const cantidadRelacionada = parseFloat(this.subproducto.cantidadRelacionada) || 0;
+      const costoPromedioProducto = parseFloat(this.productoSeleccionado?.costoPromedio) || 0;
+
       if (cantidadRelacionada > 0) {
         this.subproducto.costoPromedio = (costoPromedioProducto / cantidadRelacionada).toFixed(2);
       } else {
         this.subproducto.costoPromedio = 0;
       }
       this.calcularPrecios();
-    },
-
-    calcularStockSubproducto() {
-      const cantidadRelacionada = parseFloat(this.subproducto.cantidadRelacionada) || 0;
-      const stockProducto = parseInt(this.productoSeleccionado.stockActual) || 0;
-      if (cantidadRelacionada > 0) {
-        this.subproducto.stockActual = Math.floor(stockProducto * cantidadRelacionada);
-      } else {
-        this.subproducto.stockActual = 0;
-      }
     },
 
     calcularPrecios() {
@@ -473,7 +504,7 @@ export default {
         const response = await actualizarSubproductoFachada(this.subproducto.codigoBarras, this.subproducto);
         this.successMessage = 'Subproducto actualizado exitosamente';
         this.errorMessage = '';
-        console.log('Subproducto actualizado:', response);
+
         this.resetForm();
       } catch (error) {
         if (error.response && error.response.status === 409) {

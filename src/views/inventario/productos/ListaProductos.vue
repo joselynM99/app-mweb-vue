@@ -233,7 +233,6 @@ export default {
       try {
         const negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId;
         this.productos = await listaProductosFachada(negocioId);
-        console.log(this.productos);
 
       } catch (err) {
         if (err.response && err.response.status === 404) {

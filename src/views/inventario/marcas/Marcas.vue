@@ -2,36 +2,15 @@
   <div class="bwrapper align-items-center">
     <CContainer>
       <CRow class="justify-content-center">
-        <CCol md="6" sm="12">
+        <CCol md="8" sm="12">
           <CCard>
-            <CCardBody class="p-3">
-              <h5>{{ isEditing ? 'Actualizar' : 'Crear' }} Marca</h5>
-              <CAlert v-if="successMessage" color="success">{{ successMessage }}</CAlert>
-              <CAlert v-if="errorMessage" color="danger">{{ errorMessage }}</CAlert>
-              <CForm @submit.prevent="handleSubmit" novalidate :class="{ 'was-validated': wasValidated }">
-                <div class="mb-2">
-                  <label for="nombre" class="form-label">Nombre</label>
-                  <CInputGroup>
-                    <CInputGroupText><i class="fas fa-tag"></i></CInputGroupText>
-                    <CFormInput id="nombre" v-model="marca.nombre" placeholder="Nombre" required />
-                    <div class="invalid-feedback">El nombre es obligatorio</div>
-                  </CInputGroup>
-                </div>
-
-                <div class="d-grid" style="width:50%; margin: 5px auto;">
-                  <CButton :color="isEditing ? 'warning' : 'success'" type="submit" :disabled="isLoading">
-                    {{ isEditing ? 'Actualizar' : 'Crear' }}
-                    <CSpinner v-if="isLoading" color="light" class="spinner-border-sm" />
-                  </CButton>
-                </div>
-              </CForm>
-            </CCardBody>
-          </CCard>
-        </CCol>
-        <CCol md="6" sm="12">
-          <CCard>
-            <CCardBody class="p-3">
-              <h5>Marcas del Negocio</h5>
+            <CCardBody class="p-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>Marcas de productos</h5>
+                <CButton color="success" @click="openCreateModal" class="btn-create">
+                  <i class="fas fa-plus me-2"></i> Agregar
+                </CButton>
+              </div>
               <CInputGroup class="mb-2">
                 <CInputGroupText>
                   <i class="fas fa-search fa-fw"></i>
@@ -39,6 +18,11 @@
                 <CFormInput v-model="searchQuery" @input="debouncedBuscarMarcas" placeholder="Buscar por nombre" />
               </CInputGroup>
               <CSpinner v-if="isLoadingMarcas" color="success" class="spinner-border-sm" />
+
+              <CAlert v-if="infoMessage" color="info">{{ infoMessage }}</CAlert>
+              <CAlert v-if="errorMessage" color="danger">{{ errorMessage }}</CAlert>
+              <CAlert v-if="successMessage" color="success">{{ successMessage }}</CAlert>
+
               <CTable v-if="marcas.length > 0" hover>
                 <CTableHead color="light">
                   <CTableRow>
@@ -48,7 +32,7 @@
                 </CTableHead>
                 <CTableBody>
                   <CTableRow v-for="marca in marcas" :key="marca.id">
-                    <CTableDataCell class="text-left">{{ marca.nombre }}</CTableDataCell>
+                    <CTableDataCell class="text-center">{{ marca.nombre }}</CTableDataCell>
                     <CTableDataCell class="text-center">
                       <CButton color="warning" class="me-2" @click="editMarca(marca)">
                         <i class="fas fa-edit"></i>
@@ -60,13 +44,38 @@
                   </CTableRow>
                 </CTableBody>
               </CTable>
-              <CAlert v-if="infoMessage" color="info">{{ infoMessage }}</CAlert>
-              <CAlert v-if="errorMessage" color="danger">{{ errorMessage }}</CAlert>
+
             </CCardBody>
           </CCard>
         </CCol>
       </CRow>
     </CContainer>
+
+    <!-- Modal de creación/actualización -->
+    <CModal :visible="visibleCreateModal || visibleUpdateModal" @close="closeModal">
+      <CModalHeader @close="closeModal">
+        <CModalTitle>{{ isEditing ? 'Actualizar' : 'Crear' }} Marca</CModalTitle>
+      </CModalHeader>
+      <CModalBody>
+
+        <CForm @submit.prevent="handleSubmit" novalidate :class="{ 'was-validated': wasValidated }">
+          <div class="mb-2">
+            <label for="nombre" class="form-label">Nombre</label>
+            <CInputGroup>
+              <CInputGroupText><i class="fas fa-tag"></i></CInputGroupText>
+              <CFormInput id="nombre" v-model="marca.nombre" placeholder="Nombre" required />
+              <div class="invalid-feedback">El nombre es obligatorio</div>
+            </CInputGroup>
+          </div>
+          <div class="d-grid" style="width:50%; margin: 5px auto;">
+            <CButton :color="isEditing ? 'warning' : 'success'" type="submit" :disabled="isLoading">
+              {{ isEditing ? 'Actualizar' : 'Crear' }}
+              <CSpinner v-if="isLoading" color="light" class="spinner-border-sm" />
+            </CButton>
+          </div>
+        </CForm>
+      </CModalBody>
+    </CModal>
 
     <!-- Modal de confirmación -->
     <CModal :visible="visibleConfirmacion" @close="visibleConfirmacion = false">
@@ -107,6 +116,8 @@ export default {
       isLoading: false,
       isLoadingMarcas: false,
       isLoadingDesactivar: false,
+      visibleCreateModal: false,
+      visibleUpdateModal: false,
       visibleConfirmacion: false,
       marcaSeleccionada: null,
       isEditing: false
@@ -189,6 +200,7 @@ export default {
         }
         this.resetForm();
         this.fetchMarcas();
+        this.closeModal();
       } catch (error) {
         if (error.response && error.response.status === 409) {
           this.errorMessage = 'Ya existe una marca con el mismo nombre para este negocio';
@@ -203,7 +215,15 @@ export default {
     editMarca(marca) {
       this.marca = { ...marca };
       this.isEditing = true;
-      this.scrollToForm();
+      this.visibleUpdateModal = true;
+    },
+    openCreateModal() {
+      this.resetForm();
+      this.visibleCreateModal = true;
+    },
+    closeModal() {
+      this.visibleCreateModal = false;
+      this.visibleUpdateModal = false;
     },
     confirmarDesactivacion(marca) {
       this.marcaSeleccionada = marca;
@@ -232,12 +252,6 @@ export default {
       };
       this.wasValidated = false;
       this.isEditing = false;
-    },
-    scrollToForm() {
-      this.$nextTick(() => {
-        const formElement = this.$el.querySelector('form');
-        formElement.scrollIntoView({ behavior: 'smooth' });
-      });
     }
   }
 };
@@ -266,6 +280,12 @@ export default {
 
 .me-2 {
   margin-right: 0.5rem;
+}
+
+.btn-create {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 @media (max-width: 768px) {

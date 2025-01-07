@@ -188,7 +188,6 @@ export default {
         const response = await actualizarProveedorFachada(this.searchIdentificacion, this.proveedor);
         this.successMessage = 'Proveedor actualizado exitosamente';
         this.errorMessage = '';
-        console.log('Proveedor actualizado:', response);
         this.resetForm();
       } catch (error) {
         if (error.response && error.response.status === 404) {

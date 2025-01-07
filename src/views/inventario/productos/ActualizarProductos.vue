@@ -67,7 +67,7 @@
                       <CInputGroup>
                         <CInputGroupText><i class="fas fa-truck"></i></CInputGroupText>
                         <CFormSelect id="proveedor" v-model="producto.proveedor" :disabled="isLoadingListas">
-                          <option :value="null">Seleccione un proveedor</option>
+                          <option :value="null" disabled selected>Seleccione un proveedor</option>
                           <option v-for="proveedor in proveedores" :key="proveedor.identificacion"
                             :value="String(proveedor.identificacion)">
                             {{ proveedor.nombreComercial }}
@@ -80,7 +80,7 @@
                       <CInputGroup>
                         <CInputGroupText><i class="fas fa-list"></i></CInputGroupText>
                         <CFormSelect id="categoria" v-model="producto.categoria" :disabled="isLoadingListas">
-                          <option :value="null">Seleccione una categoría</option>
+                          <option :value="null" disabled selected>Seleccione una categoría</option>
                           <option v-for="categoria in categorias" :key="categoria.id" :value="String(categoria.id)">
                             {{ categoria.nombre }}
                           </option>
@@ -92,7 +92,7 @@
                       <CInputGroup>
                         <CInputGroupText><i class="fas fa-tag"></i></CInputGroupText>
                         <CFormSelect id="marca" v-model="producto.marca" :disabled="isLoadingListas">
-                          <option :value="null">Seleccione una marca</option>
+                          <option :value="null" disabled selected>Seleccione una marca</option>
                           <option v-for="marca in marcas" :key="marca.id" :value="String(marca.id)">
                             {{ marca.nombre }}
                           </option>

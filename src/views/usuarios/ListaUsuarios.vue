@@ -152,9 +152,7 @@ export default {
       this.isDeleting = true;
       try {
 
-        console.log(this.usuarioSeleccionado.keycloakId);
-        console.log(JSON.parse(sessionStorage.getItem('usuario')).negocioId);
-
+        
         await eliminarUsuarioFachada(this.usuarioSeleccionado.keycloakId, JSON.parse(sessionStorage.getItem('usuario')).negocioId);
 
         this.usuarios = this.usuarios.filter(usuario => usuario.id !== this.usuarioSeleccionado.id);

@@ -35,6 +35,16 @@ export const actualizarCajaFachada = async (cajaDTO) => {
   return await actualizarCaja(cajaDTO);
 };
 
+export const buscarCuadreCajaActivoPorUsuarioFachada = async (usuario, idNegocio) => {
+  return await buscarCuadreCajaActivoPorUsuario(usuario, idNegocio);
+};
+
+export const abrirCajaFachada = async (cuadreCajaDTO) => {
+  return await abrirCaja(cuadreCajaDTO);
+};
+
+
+
 // Llamadas a la API
 const crearCaja = async (cajaDTO) => {
   return apiClient.post('/caja', cajaDTO).then(r => r.data);
@@ -50,4 +60,19 @@ const desactivarCaja = async (idCaja) => {
 
 const actualizarCaja = async (cajaDTO) => {
   return apiClient.put('/caja', cajaDTO).then(r => r.data);
+};
+
+
+const buscarCuadreCajaActivoPorUsuario = async (usuario, idNegocio) => {
+  return apiClient.get(`/activo-usuario`, {
+    params: {
+      usuario,
+      idNegocio
+    }
+  }).then(r => r.data);
+};
+
+
+const abrirCaja = async (cuadreCajaDTO) => {
+  return apiClient.post('/abrir', cuadreCajaDTO).then(r => r.data);
 };

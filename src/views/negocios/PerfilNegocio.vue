@@ -114,7 +114,6 @@ export default {
   },
   async mounted() {
     this.negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId;
-    console.log('Negocio ID:', this.negocioId);
 
     await this.buscarNegocio(this.negocioId);
   },
@@ -123,7 +122,6 @@ export default {
       this.isLoadingBuscar = true;
       try {
         const negocioData = await obtenerNegocioPorIdFachada(id);
-        console.log('Negocio encontrado:', negocioData);
         this.negocio = { ...negocioData };
         this.successMessage = '';
         this.errorMessage = '';
@@ -149,11 +147,9 @@ export default {
       }
 
       try {
-        console.log('Negocio a actualizar:', this.negocio);
         const response = await actualizarNegocioFachada(this.negocioId, this.negocio);
         this.successMessage = 'Negocio actualizado exitosamente';
         this.errorMessage = '';
-        console.log('Negocio actualizado:', response);
         await this.buscarNegocio(this.negocioId);
       } catch (error) {
         this.errorMessage = 'Ha ocurrido un error al actualizar el negocio';

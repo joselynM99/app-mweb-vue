@@ -191,7 +191,6 @@ export default {
         const response = await actualizarClienteFachada(this.searchIdentificacion, this.cliente);
         this.successMessage = 'Cliente actualizado exitosamente';
         this.errorMessage = '';
-        console.log('Cliente actualizado:', response);
         this.resetForm();
       } catch (error) {
         if (error.response && error.response.status === 404) {

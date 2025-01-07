@@ -11,7 +11,6 @@ import DocsExample from '@/components/DocsExample';
 import { initKeycloak } from '@/assets/js/keycloak';
 import '@fortawesome/fontawesome-free/css/all.css'; // Importa los estilos de Font Awesome
 
-
 const app = createApp(App);
 
 initKeycloak(() => {
@@ -24,3 +23,4 @@ initKeycloak(() => {
 
   app.mount('#app');
 });
+

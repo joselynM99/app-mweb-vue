@@ -265,7 +265,6 @@ export default {
         const response = await crearUsuarioFachada(this.usuario);
         this.successMessage = 'Usuario registrado exitosamente';
         this.errorMessage = '';
-        console.log('Usuario registrado:', response);
         this.resetForm();
       } catch (error) {
         this.errorMessage = 'Ha ocurrido un error al registrar el usuario, intente con otro nombre de usuario o correo';

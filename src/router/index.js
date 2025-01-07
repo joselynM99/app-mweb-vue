@@ -42,6 +42,14 @@ const routes = [
             /* webpackChunkName: "CajasNegocio" */ '@/views/gestion-cajas/CajasNegocio.vue'
           ),
       },
+      {
+        path: 'cajas/abrir-caja',
+        name: 'AbrirCaja',
+        component: () =>
+          import(
+            /* webpackChunkName: "AbrirCaja" */ '@/views/gestion-cajas/AbrirCaja.vue'
+          ),
+      },
     ]
   },
   {
@@ -119,7 +127,7 @@ const routes = [
         name: 'Lista de Productos',
         component: () =>
           import(
-            /* webpackChunkName: "ListaProductos */ '@/views/inventario/productos/ListaProductos.vue'
+            /* webpackChunkName: "ListaProductos" */ '@/views/inventario/productos/ListaProductos.vue'
           ),
       },
 
@@ -222,7 +230,6 @@ const routes = [
 
       {
         path: '',
-        name: 'Categorías',
         component: () =>
           import(
             /* webpackChunkName: "Categorias" */ '@/views/inventario/categorias/Categorias.vue'
@@ -239,12 +246,38 @@ const routes = [
 
       {
         path: '',
-        name: 'Marcas',
         component: () =>
           import(
             /* webpackChunkName: "Marcas" */ '@/views/inventario/marcas/Marcas.vue'
           ),
+
       },
+    ]
+  },
+
+  {
+    path: '/transacciones',
+    name: 'Transacciones',
+    children: [
+
+      {
+        path: 'ventas/realizar-venta',
+        name: 'Ventas',
+        component: () =>
+          import(
+            /* webpackChunkName: "Ventas" */ '@/views/transacciones/ventas/Ventas.vue'
+          ),
+      },
+      {
+        path: 'ventas/completar-venta',
+        name: 'CompletarVenta',
+        
+        component: () =>
+          import(
+            /* webpackChunkName: "CompletarVenta" */ '@/views/transacciones/ventas/CompletarVenta.vue'
+          ),
+      },
+
     ]
   }
 ]

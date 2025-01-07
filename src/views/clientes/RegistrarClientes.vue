@@ -167,8 +167,8 @@ export default {
         const response = await crearClienteFachada(this.cliente);
         this.successMessage = 'Cliente registrado exitosamente';
         this.errorMessage = '';
-        console.log('Cliente registrado:', response);
         this.resetForm();
+        this.$emit('cliente-registrado', response.data); // Emitir evento con el cliente registrado
       } catch (error) {
         if (error.response && error.response.status === 409) {
           this.errorMessage = 'Ya existe un cliente con el mismo número de identificación';

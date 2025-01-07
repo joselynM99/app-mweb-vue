@@ -11,7 +11,11 @@
                   <i class="fas fa-plus me-2"></i> Agregar
                 </CButton>
               </div>
-              <CSpinner v-if="isLoadingCajas" color="primary" class="spinner-border-sm" />
+              <CAlert v-if="infoMessage" color="info">{{ infoMessage }}</CAlert>
+              <CAlert v-if="successMessage" color="info">{{ successMessage }}</CAlert>
+              <CAlert v-if="errorMessage" color="danger">{{ errorMessage }}</CAlert>
+              <CSpinner v-if="isLoadingCajas" color="success" class="spinner-border-sm" />
+
               <CTable v-if="cajas.length > 0" hover responsive>
                 <CTableHead color="light">
                   <CTableRow>
@@ -33,6 +37,7 @@
                   </CTableRow>
                 </CTableBody>
               </CTable>
+              
               <CAlert v-if="!cajas.length && !isLoadingCajas" color="info">
                 No se encontraron cajas activas para el negocio especificado.
               </CAlert>
@@ -57,7 +62,7 @@
             </CInputGroup>
           </div>
           <div class="d-grid">
-            <CButton color="primary" type="submit" :disabled="isLoading">
+            <CButton color="success" type="submit" :disabled="isLoading" style="width: 50%; margin: 0 auto;">
               Crear
               <CSpinner v-if="isLoading" color="light" class="spinner-border-sm" />
             </CButton>
@@ -81,7 +86,7 @@
             </CInputGroup>
           </div>
           <div class="d-grid">
-            <CButton color="warning" type="submit" :disabled="isLoading">
+            <CButton color="warning" type="submit" :disabled="isLoading" style="width: 50%; margin: 0 auto;">
               Actualizar
               <CSpinner v-if="isLoading" color="light" class="spinner-border-sm" />
             </CButton>
@@ -174,6 +179,7 @@ export default {
         this.successMessage = 'Caja creada exitosamente';
         this.fetchCajas();
         this.visibleCreateModal = false;
+        this.wasValidated = false;
       } catch (error) {
         this.errorMessage = 'Ha ocurrido un error al guardar la caja';
         console.error('Error al guardar la caja:', error);
@@ -198,6 +204,7 @@ export default {
         this.successMessage = 'Caja actualizada exitosamente';
         this.fetchCajas();
         this.visibleUpdateModal = false;
+        this.wasValidated = false;
       } catch (error) {
         this.errorMessage = 'Ha ocurrido un error al actualizar la caja';
         console.error('Error al actualizar la caja:', error);

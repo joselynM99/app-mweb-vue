@@ -319,7 +319,6 @@ export default {
 
     async obtenerCostoPromedioProducto() {
       try {
-        console.log("codigo", this.subproducto.producto);
 
         const producto = await obtenerProductoCodigoBarrasFachada(this.subproducto.producto, this.negocioId);
         this.productoSeleccionado = producto;
@@ -342,8 +341,7 @@ export default {
     calcularCostoPromedioSubproducto() {
       const cantidadRelacionada = parseFloat(this.subproducto.cantidadRelacionada) || 0;
       const costoPromedioProducto = parseFloat(this.productoSeleccionado.costoPromedio) || 0;
-      console.log("cantidadRelacionada", cantidadRelacionada);
-      console.log("costoPromedioProducto", costoPromedioProducto);
+
       if (cantidadRelacionada > 0) {
         this.subproducto.costoPromedio = (costoPromedioProducto / cantidadRelacionada).toFixed(2);
       } else {
@@ -430,7 +428,7 @@ export default {
         const response = await registrarSubproductoFachada(this.subproducto);
         this.successMessage = 'Subproducto registrado exitosamente';
         this.errorMessage = '';
-        console.log('Subproducto registrado:', response);
+
         this.resetForm();
       } catch (error) {
         if (error.response && error.response.status === 409) {

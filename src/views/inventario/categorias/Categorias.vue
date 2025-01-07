@@ -2,43 +2,16 @@
   <div class="bwrapper align-items-center">
     <CContainer>
       <CRow class="justify-content-center">
-        <CCol md="6" sm="12">
+        <CCol md="8" sm="12">
           <CCard>
-            <CCardBody class="p-3">
-              <h5>{{ isEditing ? 'Actualizar' : 'Crear' }} Categoría</h5>
-              <CAlert v-if="successMessage" color="success">{{ successMessage }}</CAlert>
-              <CAlert v-if="errorMessage" color="danger">{{ errorMessage }}</CAlert>
-              <CForm @submit.prevent="handleSubmit" novalidate :class="{ 'was-validated': wasValidated }">
-                <div class="mb-2">
-                  <label for="nombre" class="form-label">Nombre</label>
-                  <CInputGroup>
-                    <CInputGroupText><i class="fas fa-tag"></i></CInputGroupText>
-                    <CFormInput id="nombre" v-model="categoria.nombre" placeholder="Nombre" required />
-                    <div class="invalid-feedback">El nombre es obligatorio</div>
-                  </CInputGroup>
-                </div>
-                <div class="mb-2">
-                  <label for="descripcion" class="form-label">Descripción</label>
-                  <CInputGroup>
-                    <CInputGroupText><i class="fas fa-info-circle"></i></CInputGroupText>
-                    <CFormInput id="descripcion" v-model="categoria.descripcion" placeholder="Descripción" required />
-                    <div class="invalid-feedback">La descripción es obligatoria</div>
-                  </CInputGroup>
-                </div>
-                <div class="d-grid" style="width:50%; margin: 5px auto;">
-                  <CButton :color="isEditing ? 'warning' : 'success'" type="submit" :disabled="isLoading">
-                    {{ isEditing ? 'Actualizar' : 'Crear' }}
-                    <CSpinner v-if="isLoading" color="light" class="spinner-border-sm" />
-                  </CButton>
-                </div>
-              </CForm>
-            </CCardBody>
-          </CCard>
-        </CCol>
-        <CCol md="6" sm="12">
-          <CCard>
-            <CCardBody class="p-3">
-              <h5>Categorías del Negocio</h5>
+            <CCardBody class="p-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>Categorías de productos</h5>
+                <CButton color="success" @click="openCreateModal" class="btn-create">
+                  <i class="fas fa-plus me-2"></i> Agregar
+                </CButton>
+              </div>
+
               <CInputGroup class="mb-2">
                 <CInputGroupText>
                   <i class="fas fa-search fa-fw"></i>
@@ -46,11 +19,16 @@
                 <CFormInput v-model="searchQuery" @input="debouncedBuscarCategorias" placeholder="Buscar por nombre" />
               </CInputGroup>
               <CSpinner v-if="isLoadingCategorias" color="success" class="spinner-border-sm" />
+
+              <CAlert v-if="infoMessage" color="info">{{ infoMessage }}</CAlert>
+              <CAlert v-if="successMessage" color="info">{{ successMessage }}</CAlert>
+              <CAlert v-if="errorMessage" color="danger">{{ errorMessage }}</CAlert>
+
               <CTable v-if="categorias.length > 0" hover>
                 <CTableHead color="light">
                   <CTableRow>
-                    <CTableHeaderCell scope="col">Nombre</CTableHeaderCell>
-                    <CTableHeaderCell scope="col" style="width: 150px;">Descripción</CTableHeaderCell>
+                    <CTableHeaderCell scope="col" class="text-left">Nombre</CTableHeaderCell>
+                    <CTableHeaderCell scope="col" style="width: 150px;" class="text-left">Descripción</CTableHeaderCell>
                     <CTableHeaderCell scope="col" class="text-center">Acciones</CTableHeaderCell>
                   </CTableRow>
                 </CTableHead>
@@ -69,13 +47,46 @@
                   </CTableRow>
                 </CTableBody>
               </CTable>
-              <CAlert v-if="infoMessage" color="info">{{ infoMessage }}</CAlert>
-              <CAlert v-if="errorMessage" color="danger">{{ errorMessage }}</CAlert>
+
             </CCardBody>
           </CCard>
         </CCol>
       </CRow>
     </CContainer>
+
+    <!-- Modal de creación/actualización -->
+    <CModal :visible="visibleCreateModal || visibleUpdateModal" @close="closeModal">
+      <CModalHeader @close="closeModal">
+        <CModalTitle>{{ isEditing ? 'Actualizar' : 'Crear' }} Categoría</CModalTitle>
+      </CModalHeader>
+      <CModalBody>
+
+        <CForm @submit.prevent="handleSubmit" novalidate :class="{ 'was-validated': wasValidated }">
+          <div class="mb-2">
+            <label for="nombre" class="form-label">Nombre</label>
+            <CInputGroup>
+              <CInputGroupText><i class="fas fa-tag"></i></CInputGroupText>
+              <CFormInput id="nombre" v-model="categoria.nombre" placeholder="Nombre" required />
+              <div class="invalid-feedback">El nombre es obligatorio</div>
+            </CInputGroup>
+          </div>
+          <div class="mb-2">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <CInputGroup>
+              <CInputGroupText><i class="fas fa-info-circle"></i></CInputGroupText>
+              <CFormInput id="descripcion" v-model="categoria.descripcion" placeholder="Descripción" required />
+              <div class="invalid-feedback">La descripción es obligatoria</div>
+            </CInputGroup>
+          </div>
+          <div class="d-grid" style="width:50%; margin: 5px auto;">
+            <CButton :color="isEditing ? 'warning' : 'success'" type="submit" :disabled="isLoading">
+              {{ isEditing ? 'Actualizar' : 'Crear' }}
+              <CSpinner v-if="isLoading" color="light" class="spinner-border-sm" />
+            </CButton>
+          </div>
+        </CForm>
+      </CModalBody>
+    </CModal>
 
     <!-- Modal de confirmación -->
     <CModal :visible="visibleConfirmacion" @close="visibleConfirmacion = false">
@@ -99,7 +110,6 @@ import { debounce } from 'lodash';
 import { registrarCategoriaFachada, actualizarCategoriaFachada, listaCategoriasFachada, listaCategoriasPorNombreFachada, desactivarCategoriaFachada } from '@/assets/js/categorias';
 
 export default {
-
   data() {
     return {
       negocioId: null,
@@ -118,6 +128,8 @@ export default {
       isLoading: false,
       isLoadingCategorias: false,
       isLoadingDesactivar: false,
+      visibleCreateModal: false,
+      visibleUpdateModal: false,
       visibleConfirmacion: false,
       categoriaSeleccionada: null,
       isEditing: false
@@ -200,6 +212,7 @@ export default {
         }
         this.resetForm();
         this.fetchCategorias();
+        this.closeModal();
       } catch (error) {
         this.errorMessage = 'Ha ocurrido un error al guardar la categoría';
         console.error('Error al guardar la categoría:', error);
@@ -210,7 +223,15 @@ export default {
     editCategoria(categoria) {
       this.categoria = { ...categoria };
       this.isEditing = true;
-      this.scrollToForm();
+      this.visibleUpdateModal = true;
+    },
+    openCreateModal() {
+      this.resetForm();
+      this.visibleCreateModal = true;
+    },
+    closeModal() {
+      this.visibleCreateModal = false;
+      this.visibleUpdateModal = false;
     },
     confirmarDesactivacion(categoria) {
       this.categoriaSeleccionada = categoria;
@@ -240,12 +261,6 @@ export default {
       };
       this.wasValidated = false;
       this.isEditing = false;
-    },
-    scrollToForm() {
-      this.$nextTick(() => {
-        const formElement = this.$el.querySelector('form');
-        formElement.scrollIntoView({ behavior: 'smooth' });
-      });
     }
   }
 };
@@ -274,6 +289,12 @@ export default {
 
 .me-2 {
   margin-right: 0.5rem;
+}
+
+.btn-create {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 @media (max-width: 768px) {

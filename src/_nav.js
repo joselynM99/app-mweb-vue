@@ -119,7 +119,7 @@ export default [
       {
         component: 'CNavItem',
         name: 'Actualizar',
-        to: '/negocio/actualizar-subproducto',
+        to: '/inventario/subproductos/actualizar',
         icon: 'fas fa-edit', // Editar subproducto
       },
     ],
@@ -171,7 +171,7 @@ export default [
   {
     component: 'CNavItem',
     name: 'Ventas',
-    to: '/ventas/realizar-venta',
+    to: '/transacciones/ventas/realizar-venta',
     icon: 'fas fa-shopping-cart', // Ventas
   },
   {

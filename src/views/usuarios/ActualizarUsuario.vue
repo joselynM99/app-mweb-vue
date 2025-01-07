@@ -250,7 +250,6 @@ export default {
 
         const usuarioData = await buscarUsuarioPorNombreUsuarioNegocioFachada(this.searchUsername, JSON.parse(sessionStorage.getItem('usuario')).negocioId);
 
-        console.log('Usuario encontrado:', usuarioData);
         this.usuario = { ...usuarioData, password: '', passwordConfirm: '' }; // Reset passwords
         this.successMessage = '';
         this.errorMessage = '';
@@ -311,11 +310,9 @@ export default {
       this.isLoadingActualizar = true;
       try {
         this.usuario.negocioId = this.negocioId;
-        console.log('Usuario a actualizar:', this.usuario);
         const response = await actualizarUsuarioFachada(this.usuario.keycloakId, this.usuario);
         this.successMessage = 'Usuario actualizado exitosamente';
         this.errorMessage = '';
-        console.log('Usuario actualizado:', response);
         this.resetForm();
         if (this.isCurrentUser) {
           await KeycloakService.logout();

@@ -170,7 +170,6 @@ export default {
         const response = await registrarProveedorFachada(this.proveedor);
         this.successMessage = 'Proveedor registrado exitosamente';
         this.errorMessage = '';
-        console.log('Proveedor registrado:', response);
         this.resetForm();
       } catch (error) {
         if (error.response && error.response.status === 409) {
