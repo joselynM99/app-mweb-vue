@@ -93,7 +93,7 @@ export default [
       {
         component: 'CNavItem',
         name: 'Actualizar',
-        to: '/negocio/actualizar-producto',
+        to: '/inventario/productos/actualizar',
         icon: 'fas fa-edit', // Editar producto
       },
     ],
@@ -113,7 +113,7 @@ export default [
       {
         component: 'CNavItem',
         name: 'Registrar',
-        to: '/inventario/agregar-subproducto',
+        to: '/inventario/subproductos/agregar',
         icon: 'fas fa-plus-square', // Registrar subproducto
       },
       {
@@ -162,7 +162,7 @@ export default [
     name: 'Marcas',
     to: '/inventario/marcas',
     icon: 'fas fa-certificate', // Marcas
-    
+
   },
   {
     component: 'CNavTitle',

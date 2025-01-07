@@ -52,8 +52,8 @@
                       <label for="telefono" class="form-label">Teléfono</label>
                       <CInputGroup>
                         <CInputGroupText><i class="fas fa-phone"></i></CInputGroupText>
-                        <CFormInput id="telefono" v-model="cliente.telefono" placeholder="Teléfono" required />
-                        <div class="invalid-feedback">El teléfono es obligatorio</div>
+                        <CFormInput id="telefono" v-model="cliente.telefono" placeholder="0900000000"  pattern="[0-9]{10}" required />
+                        <div class="invalid-feedback">El teléfono es obligatorio y debe contener solo números</div>
                       </CInputGroup>
                     </div>
                   </CCol>
@@ -87,7 +87,7 @@
                     </div>
                   </CCol>
                 </CRow>
-                <div class="d-grid" style="width:35%; margin: 5px auto;">
+                <div class="d-grid" style="width:30%; margin: 5px auto;">
                   <CButton color="success" type="submit" :disabled="isLoadingActualizar">
                     Actualizar
                     <CSpinner v-if="isLoadingActualizar" color="light" class="spinner-border-sm" />

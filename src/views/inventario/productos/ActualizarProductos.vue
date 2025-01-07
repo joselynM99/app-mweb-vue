@@ -11,12 +11,20 @@
                 </CInputGroupText>
                 <CFormInput v-model="searchCodigoBarras" placeholder="Buscar por código de barras" required />
                 <CInputGroupText style="padding:0px 5px">
-                  <button @click="buscarProducto" :disabled="isLoadingBuscar" style="border: none; background: none; margin:0px; padding:5px">
+                  <button @click="buscarProducto" :disabled="isLoadingBuscar"
+                    style="border: none; background: none; margin:0px; padding:5px">
                     Buscar
                     <CSpinner v-if="isLoadingBuscar" color="light" class="spinner-border-sm" />
                   </button>
                 </CInputGroupText>
+                <CInputGroupText style="padding:0px 5px">
+                  <button @click="abrirCamara('search')" style="border: none; background: none; margin:0px; padding:5px"
+                    type="button">
+                    <i class="fas fa-camera"></i>
+                  </button>
+                </CInputGroupText>
               </CInputGroup>
+              <div id="scanner-container" style="width: 100%; height: auto; display: none; "></div>
               <hr />
               <div v-if="isLoadingListas" class="text-center mt-3">
                 <CSpinner color="success" />
@@ -29,22 +37,39 @@
                   <CCol md="6">
                     <div class="mb-2">
                       <CFormLabel for="codigoBarras">Código de Barras</CFormLabel>
-                      <CFormInput id="codigoBarras" v-model="producto.codigoBarras" required />
+                      <CInputGroup>
+                        <CInputGroupText><i class="fas fa-barcode"></i></CInputGroupText>
+                        <CFormInput id="codigoBarras" v-model="producto.codigoBarras" required />
+                        <CInputGroupText style="padding:0px 5px">
+                          <button @click="abrirCamara('producto')"
+                            style="border: none; background: none; margin:0px; padding:5px" type="button">
+                            <i class="fas fa-camera"></i>
+                          </button>
+                        </CInputGroupText>
+                      </CInputGroup>
                     </div>
                     <div class="mb-2">
                       <CFormLabel for="nombre">Nombre</CFormLabel>
-                      <CFormInput id="nombre" v-model="producto.nombre" required />
+                      <CInputGroup>
+                        <CInputGroupText><i class="fas fa-tag"></i></CInputGroupText>
+                        <CFormInput id="nombre" v-model="producto.nombre" required />
+                      </CInputGroup>
                     </div>
                     <div class="mb-2">
                       <CFormLabel for="descripcion">Descripción</CFormLabel>
-                      <CFormInput id="descripcion" v-model="producto.descripcion" />
+                      <CInputGroup>
+                        <CInputGroupText><i class="fas fa-info-circle"></i></CInputGroupText>
+                        <CFormInput id="descripcion" v-model="producto.descripcion" />
+                      </CInputGroup>
                     </div>
                     <div class="mb-2">
                       <CFormLabel for="proveedor">Proveedor</CFormLabel>
                       <CInputGroup>
+                        <CInputGroupText><i class="fas fa-truck"></i></CInputGroupText>
                         <CFormSelect id="proveedor" v-model="producto.proveedor" :disabled="isLoadingListas">
                           <option :value="null">Seleccione un proveedor</option>
-                          <option v-for="proveedor in proveedores" :key="proveedor.identificacion" :value="proveedor.identificacion">
+                          <option v-for="proveedor in proveedores" :key="proveedor.identificacion"
+                            :value="String(proveedor.identificacion)">
                             {{ proveedor.nombreComercial }}
                           </option>
                         </CFormSelect>
@@ -53,9 +78,10 @@
                     <div class="mb-2">
                       <CFormLabel for="categoria">Categoría</CFormLabel>
                       <CInputGroup>
+                        <CInputGroupText><i class="fas fa-list"></i></CInputGroupText>
                         <CFormSelect id="categoria" v-model="producto.categoria" :disabled="isLoadingListas">
                           <option :value="null">Seleccione una categoría</option>
-                          <option v-for="categoria in categorias" :key="categoria.id" :value="categoria.id">
+                          <option v-for="categoria in categorias" :key="categoria.id" :value="String(categoria.id)">
                             {{ categoria.nombre }}
                           </option>
                         </CFormSelect>
@@ -64,9 +90,10 @@
                     <div class="mb-2">
                       <CFormLabel for="marca">Marca</CFormLabel>
                       <CInputGroup>
+                        <CInputGroupText><i class="fas fa-tag"></i></CInputGroupText>
                         <CFormSelect id="marca" v-model="producto.marca" :disabled="isLoadingListas">
                           <option :value="null">Seleccione una marca</option>
-                          <option v-for="marca in marcas" :key="marca.id" :value="marca.id">
+                          <option v-for="marca in marcas" :key="marca.id" :value="String(marca.id)">
                             {{ marca.nombre }}
                           </option>
                         </CFormSelect>
@@ -76,43 +103,60 @@
                   <CCol md="6">
                     <div class="mb-2">
                       <CFormLabel for="costoPromedio">Costo Promedio</CFormLabel>
-                      <CFormInput id="costoPromedio" v-model="producto.costoPromedio" @input="validateAndCalculate" required />
+                      <CInputGroup>
+                        <CInputGroupText><i class="fas fa-dollar-sign"></i></CInputGroupText>
+                        <CFormInput id="costoPromedio" v-model="producto.costoPromedio" @input="validateAndCalculate"
+                          required />
+                      </CInputGroup>
                       <div class="invalid-feedback">El costo promedio es obligatorio</div>
                     </div>
                     <div class="mb-2">
                       <CFormLabel for="utilidad">Utilidad</CFormLabel>
                       <CInputGroup>
-                        <CFormInput id="utilidad" v-model="producto.utilidad" @input="validateAndCalculate" required />
+                        <CInputGroupText><i class="fas fa-percentage"></i></CInputGroupText>
+                        <CFormInput id="utilidad" v-model="producto.utilidad" @input="validateAndCalculate" />
                         <CFormSelect v-model="tipoUtilidad" @change="validateAndCalculate">
                           <option value="porcentaje">Porcentaje</option>
                           <option value="valor">Valor</option>
                         </CFormSelect>
-                        <div class="invalid-feedback">La utilidad es obligatoria</div>
                       </CInputGroup>
+                      <div class="invalid-feedback">La utilidad es obligatoria</div>
                     </div>
                     <div class="mb-2">
                       <CFormLabel for="precioSinImpuestos">Precio Sin Impuestos</CFormLabel>
-                      <CFormInput id="precioSinImpuestos" v-model="producto.precioSinImpuestos" readonly />
+                      <CInputGroup>
+                        <CInputGroupText><i class="fas fa-dollar-sign"></i></CInputGroupText>
+                        <CFormInput id="precioSinImpuestos" v-model="producto.precioSinImpuestos" readonly />
+                      </CInputGroup>
                     </div>
                     <div class="mb-2">
                       <CFormLabel for="impuesto">Impuesto</CFormLabel>
                       <CInputGroup>
-                        <CFormSelect id="impuesto" v-model="producto.impuesto" @change="validateAndCalculate" required :disabled="isLoadingListas">
+                        <CInputGroupText><i class="fas fa-percentage"></i></CInputGroupText>
+                        <CFormSelect id="impuesto" v-model="producto.impuesto" @change="validateAndCalculate" required
+                          :disabled="isLoadingListas">
                           <option :value="null" disabled selected>Seleccione un impuesto</option>
-                          <option v-for="impuesto in impuestos" :key="impuesto.id" :value="impuesto.id">
+                          <option v-for="impuesto in impuestos" :key="impuesto.id" :value="String(impuesto.id)">
                             {{ impuesto.tipoImpuesto }} - {{ impuesto.valor }}%
                           </option>
                         </CFormSelect>
-                        <div class="invalid-feedback">El impuesto es obligatorio</div>
                       </CInputGroup>
+                      <div class="invalid-feedback">El impuesto es obligatorio</div>
                     </div>
                     <div class="mb-2">
                       <CFormLabel for="precioVenta">Precio de Venta</CFormLabel>
-                      <CFormInput id="precioVenta" v-model="producto.precioVenta" readonly />
+                      <CInputGroup>
+                        <CInputGroupText><i class="fas fa-dollar-sign"></i></CInputGroupText>
+                        <CFormInput id="precioVenta" v-model="producto.precioVenta" readonly />
+                      </CInputGroup>
                     </div>
                     <div class="mb-2">
                       <CFormLabel for="stockActual">Stock Actual</CFormLabel>
-                      <CFormInput id="stockActual" v-model="producto.stockActual" @input="validateAndCalculate" required />
+                      <CInputGroup>
+                        <CInputGroupText><i class="fas fa-box"></i></CInputGroupText>
+                        <CFormInput id="stockActual" v-model="producto.stockActual" @input="validateAndCalculate"
+                          required />
+                      </CInputGroup>
                       <div class="invalid-feedback">El stock actual es obligatorio</div>
                     </div>
                   </CCol>
@@ -139,6 +183,7 @@ import { listaCategoriasFachada } from '@/assets/js/categorias';
 import { listaMarcasFachada } from '@/assets/js/marcas';
 import { listaImpuestosFachada } from '@/assets/js/impuestos';
 import { debounce } from 'lodash';
+import Quagga from 'quagga'; // Importamos QuaggaJS
 
 export default {
   data() {
@@ -208,20 +253,44 @@ export default {
       }
     },
     async cargarListas() {
+      this.isLoadingListas = true; // Mostrar el spinner mientras se cargan las listas
       try {
-        this.proveedores = await listaProveedoresFachada(this.negocioId);
-        this.categorias = await listaCategoriasFachada(this.negocioId);
-        this.marcas = await listaMarcasFachada(this.negocioId);
-        this.impuestos = await listaImpuestosFachada();
-      } catch (error) {
-        console.error('Error al cargar listas:', error);
+        // Manejar cada llamada de manera independiente
+        try {
+          this.proveedores = await listaProveedoresFachada(this.negocioId);
+        } catch (error) {
+          console.error('Error al cargar proveedores:', error);
+        }
+
+        try {
+          this.categorias = await listaCategoriasFachada(this.negocioId);
+        } catch (error) {
+          console.error('Error al cargar categorías:', error);
+        }
+
+        try {
+          this.marcas = await listaMarcasFachada(this.negocioId);
+        } catch (error) {
+          console.error('Error al cargar marcas:', error);
+        }
+
+        try {
+          const impuestos = await listaImpuestosFachada();
+          this.impuestos = impuestos.map(impuesto => ({
+            ...impuesto,
+            id: String(impuesto.id) // Convertir id a cadena
+          }));
+        } catch (error) {
+          console.error('Error al cargar impuestos:', error);
+        }
       } finally {
-        this.isLoadingListas = false;
+        this.isLoadingListas = false; // Ocultar el spinner cuando las listas se hayan cargado
       }
-    },
+    }
+    ,
     calcularPrecios() {
       const costoPromedio = parseFloat(this.producto.costoPromedio) || 0;
-      const impuesto = this.impuestos.find(i => i.id === Number(this.producto.impuesto));
+      const impuesto = this.impuestos.find(i => i.id === this.producto.impuesto);
       const valorImpuesto = impuesto ? impuesto.valor / 100 : 0;
 
       if (this.tipoUtilidad === 'porcentaje') {
@@ -263,6 +332,16 @@ export default {
       this.errorMessage = '';
       this.successMessage = '';
 
+      if (this.producto.proveedor === "Seleccione un proveedor") {
+        this.producto.proveedor = null;
+      }
+      if (this.producto.marca === "Seleccione una marca") {
+        this.producto.marca = null;
+      }
+      if (this.producto.categoria === "Seleccione una categoría") {
+        this.producto.categoria = null;
+      }
+
       // Validar que todos los campos estén completos
       if (!this.producto.codigoBarras || !this.producto.nombre || !this.producto.costoPromedio || this.producto.stockActual === null || this.producto.impuesto === null) {
         this.errorMessage = 'Por favor, complete todos los campos obligatorios';
@@ -278,10 +357,10 @@ export default {
       // Si todos los campos son válidos, proceder con la actualización
       this.isLoadingActualizar = true;
       try {
+
         const response = await actualizarProductoFachada(this.searchCodigoBarras, this.producto);
         this.successMessage = 'Producto actualizado exitosamente';
         this.errorMessage = '';
-        console.log('Producto actualizado:', response);
         this.resetForm();
       } catch (error) {
         if (error.response && error.response.status === 404) {
@@ -294,6 +373,66 @@ export default {
       } finally {
         this.isLoadingActualizar = false;
       }
+    },
+    mostrarContenedorEscaner() {
+      document.getElementById('scanner-container').style.display = 'block';
+    },
+    configurarQuagga() {
+      Quagga.init({
+        inputStream: {
+          type: "LiveStream",
+          target: document.querySelector('#scanner-container'),
+          constraints: {
+            facingMode: "environment",
+            width: 480,
+            height: 320
+          }
+        },
+        decoder: {
+          readers: [
+            "code_128_reader",
+            "ean_reader",
+            "ean_8_reader",
+            "code_39_reader",
+            "upc_reader",
+            "upc_e_reader",
+            "codabar_reader",
+            "code_93_reader"
+          ],
+          multiple: false
+        },
+        locate: true,
+        locator: {
+          halfSample: false,
+          patchSize: "medium"
+        },
+        frequency: 100
+      }, this.iniciarQuagga);
+    },
+    iniciarQuagga(err) {
+      if (err) {
+        console.error('Error al iniciar Quagga:', err);
+        return;
+      }
+      Quagga.start();
+    },
+    manejarDeteccion(result) {
+      if (result && result.codeResult && result.codeResult.code) {
+        if (this.target === 'search') {
+          this.searchCodigoBarras = result.codeResult.code;
+          this.buscarProducto();
+        } else if (this.target === 'producto') {
+          this.producto.codigoBarras = result.codeResult.code;
+        }
+        Quagga.stop();
+        document.getElementById('scanner-container').style.display = 'none';
+      }
+    },
+    abrirCamara(target) {
+      this.target = target;
+      this.mostrarContenedorEscaner();
+      this.configurarQuagga();
+      Quagga.onDetected(this.manejarDeteccion);
     }
   },
   mounted() {
@@ -326,5 +465,16 @@ export default {
   margin-bottom: 0.25rem;
   display: block;
   text-align: left;
+}
+
+#scanner-container {
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+  overflow: hidden;
+  margin: 10px auto !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>

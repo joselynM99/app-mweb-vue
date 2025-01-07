@@ -2,40 +2,17 @@
   <div class="bwrapper align-items-center">
     <CContainer>
       <CRow class="justify-content-center">
-        <CCol md="6" sm="12">
+        <CCol md="8" sm="12">
           <CCard>
-            <CCardBody class="p-3">
-              <h5>{{ isEditing ? 'Actualizar' : 'Crear' }} Caja</h5>
-              <CAlert v-if="successMessage" color="success">{{ successMessage }}</CAlert>
-              <CAlert v-if="errorMessage" color="danger">{{ errorMessage }}</CAlert>
-              <CForm @submit.prevent="handleSubmit" novalidate :class="{ 'was-validated': wasValidated }">
-                <CRow>
-                  <CCol>
-                    <div class="mb-2">
-                      <label for="nombreCaja" class="form-label">Nombre de Caja</label>
-                      <CInputGroup>
-                        <CFormInput id="nombreCaja" v-model="caja.nombre" placeholder="Nombre de Caja" required />
-                        <div class="invalid-feedback">El nombre de la caja es obligatorio</div>
-                      </CInputGroup>
-                    </div>
-                  </CCol>
-                </CRow>
-                <div class="d-grid" style="width:50%; margin: 5px auto;">
-                  <CButton :color="isEditing ? 'warning' : 'success'" type="submit" :disabled="isLoading">
-                    {{ isEditing ? 'Actualizar' : 'Crear' }}
-                    <CSpinner v-if="isLoading" color="light" class="spinner-border-sm" />
-                  </CButton>
-                </div>
-              </CForm>
-            </CCardBody>
-          </CCard>
-        </CCol>
-        <CCol md="6" sm="12">
-          <CCard>
-            <CCardBody class="p-3">
-              <h5>Cajas del Negocio</h5>
-              <CSpinner v-if="isLoadingCajas" color="success" class="spinner-border-sm" />
-              <CTable v-if="cajas.length > 0" hover>
+            <CCardBody class="p-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Cajas del Negocio</h5>
+                <CButton color="success" @click="openCreateModal" class="btn-create">
+                  <i class="fas fa-plus me-2"></i> Agregar
+                </CButton>
+              </div>
+              <CSpinner v-if="isLoadingCajas" color="primary" class="spinner-border-sm" />
+              <CTable v-if="cajas.length > 0" hover responsive>
                 <CTableHead color="light">
                   <CTableRow>
                     <CTableHeaderCell scope="col">Nombre</CTableHeaderCell>
@@ -46,7 +23,7 @@
                   <CTableRow v-for="caja in cajas" :key="caja.id">
                     <CTableDataCell>{{ caja.nombre }}</CTableDataCell>
                     <CTableDataCell class="text-center">
-                      <CButton color="warning" size="sm" @click="editCaja(caja)" class="me-2">
+                      <CButton color="warning" size="sm" @click="openUpdateModal(caja)" class="me-2">
                         <i class="fas fa-edit"></i>
                       </CButton>
                       <CButton color="danger" size="sm" @click="confirmarDesactivacion(caja)">
@@ -64,6 +41,54 @@
         </CCol>
       </CRow>
     </CContainer>
+
+    <!-- Modal de creación -->
+    <CModal :visible="visibleCreateModal" @close="visibleCreateModal = false">
+      <CModalHeader @close="visibleCreateModal = false">
+        <CModalTitle>Crear Caja</CModalTitle>
+      </CModalHeader>
+      <CModalBody>
+        <CForm @submit.prevent="handleSubmitCreate" novalidate :class="{ 'was-validated': wasValidated }">
+          <div class="mb-3">
+            <label for="nombreCajaCreate" class="form-label">Nombre de Caja</label>
+            <CInputGroup>
+              <CFormInput id="nombreCajaCreate" v-model="caja.nombre" placeholder="Nombre de Caja" required />
+              <div class="invalid-feedback">El nombre de la caja es obligatorio</div>
+            </CInputGroup>
+          </div>
+          <div class="d-grid">
+            <CButton color="primary" type="submit" :disabled="isLoading">
+              Crear
+              <CSpinner v-if="isLoading" color="light" class="spinner-border-sm" />
+            </CButton>
+          </div>
+        </CForm>
+      </CModalBody>
+    </CModal>
+
+    <!-- Modal de actualización -->
+    <CModal :visible="visibleUpdateModal" @close="visibleUpdateModal = false">
+      <CModalHeader @close="visibleUpdateModal = false">
+        <CModalTitle>Actualizar Caja</CModalTitle>
+      </CModalHeader>
+      <CModalBody>
+        <CForm @submit.prevent="handleSubmitUpdate" novalidate :class="{ 'was-validated': wasValidated }">
+          <div class="mb-3">
+            <label for="nombreCajaUpdate" class="form-label">Nombre de Caja</label>
+            <CInputGroup>
+              <CFormInput id="nombreCajaUpdate" v-model="caja.nombre" placeholder="Nombre de Caja" required />
+              <div class="invalid-feedback">El nombre de la caja es obligatorio</div>
+            </CInputGroup>
+          </div>
+          <div class="d-grid">
+            <CButton color="warning" type="submit" :disabled="isLoading">
+              Actualizar
+              <CSpinner v-if="isLoading" color="light" class="spinner-border-sm" />
+            </CButton>
+          </div>
+        </CForm>
+      </CModalBody>
+    </CModal>
 
     <!-- Modal de confirmación -->
     <CModal :visible="visibleConfirmacion" @close="visibleConfirmacion = false">
@@ -101,6 +126,8 @@ export default {
       isLoading: false,
       isLoadingCajas: false,
       isLoadingDesactivar: false,
+      visibleCreateModal: false,
+      visibleUpdateModal: false,
       visibleConfirmacion: false,
       cajaSeleccionada: null,
       isEditing: false
@@ -108,7 +135,6 @@ export default {
   },
   mounted() {
     this.negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId;
-
     this.fetchCajas();
   },
   methods: {
@@ -123,7 +149,15 @@ export default {
         this.isLoadingCajas = false;
       }
     },
-    async handleSubmit() {
+    openCreateModal() {
+      this.resetForm();
+      this.visibleCreateModal = true;
+    },
+    openUpdateModal(caja) {
+      this.caja = { ...caja };
+      this.visibleUpdateModal = true;
+    },
+    async handleSubmitCreate() {
       this.wasValidated = true;
       this.errorMessage = '';
       this.successMessage = '';
@@ -135,17 +169,11 @@ export default {
 
       this.isLoading = true;
       try {
-        if (this.isEditing) {
-          this.caja.idNegocio = this.negocioId;
-          await actualizarCajaFachada(this.caja);
-          this.successMessage = 'Caja actualizada exitosamente';
-        } else {
-          this.caja.idNegocio = this.negocioId;
-          await crearCajaFachada(this.caja);
-          this.successMessage = 'Caja creada exitosamente';
-        }
-        this.resetForm();
+        this.caja.idNegocio = this.negocioId;
+        await crearCajaFachada(this.caja);
+        this.successMessage = 'Caja creada exitosamente';
         this.fetchCajas();
+        this.visibleCreateModal = false;
       } catch (error) {
         this.errorMessage = 'Ha ocurrido un error al guardar la caja';
         console.error('Error al guardar la caja:', error);
@@ -153,10 +181,29 @@ export default {
         this.isLoading = false;
       }
     },
-    editCaja(caja) {
-      this.caja = { ...caja };
-      this.isEditing = true;
-      this.scrollToForm();
+    async handleSubmitUpdate() {
+      this.wasValidated = true;
+      this.errorMessage = '';
+      this.successMessage = '';
+
+      if (!this.caja.nombre) {
+        this.errorMessage = 'Por favor, complete todos los campos obligatorios';
+        return;
+      }
+
+      this.isLoading = true;
+      try {
+        this.caja.idNegocio = this.negocioId;
+        await actualizarCajaFachada(this.caja);
+        this.successMessage = 'Caja actualizada exitosamente';
+        this.fetchCajas();
+        this.visibleUpdateModal = false;
+      } catch (error) {
+        this.errorMessage = 'Ha ocurrido un error al actualizar la caja';
+        console.error('Error al actualizar la caja:', error);
+      } finally {
+        this.isLoading = false;
+      }
     },
     confirmarDesactivacion(caja) {
       this.cajaSeleccionada = caja;
@@ -168,7 +215,6 @@ export default {
         await desactivarCajaFachada(this.cajaSeleccionada.id);
         this.successMessage = 'Caja eliminada exitosamente';
         this.fetchCajas();
-        this.resetForm();
       } catch (error) {
         this.errorMessage = 'Ha ocurrido un error al eliminar la caja';
         console.error('Error al eliminar la caja:', error);
@@ -184,12 +230,6 @@ export default {
       };
       this.wasValidated = false;
       this.isEditing = false;
-    },
-    scrollToForm() {
-      this.$nextTick(() => {
-        const formElement = this.$el.querySelector('form');
-        formElement.scrollIntoView({ behavior: 'smooth' });
-      });
     }
   }
 };
@@ -209,15 +249,21 @@ export default {
 }
 
 .form-label {
-  font-size: 0.8rem;
-  color: #6c757d;
-  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+  color: #495057;
+  margin-bottom: 0.5rem;
   display: block;
   text-align: left;
 }
 
 .me-2 {
   margin-right: 0.5rem;
+}
+
+.btn-create {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 @media (max-width: 768px) {

@@ -29,10 +29,11 @@
                     </div>
 
                     <div class="mb-2">
-                      <label for="correo" class="form-label">Correo</label>
+                      <label for="correo" class="form-label">Correo electrónico</label>
                       <CInputGroup>
                         <CInputGroupText><i class="fas fa-envelope"></i></CInputGroupText>
-                        <CFormInput id="correo" v-model="cliente.correo" type="email" placeholder="Email" autocomplete="email" required />
+                        <CFormInput id="correo" v-model="cliente.correo" type="email" placeholder="Email"
+                          autocomplete="email" required />
                         <div class="invalid-feedback">El correo es obligatorio y debe ser válido</div>
                       </CInputGroup>
                     </div>
@@ -41,8 +42,10 @@
                       <label for="telefono" class="form-label">Teléfono</label>
                       <CInputGroup>
                         <CInputGroupText><i class="fas fa-phone"></i></CInputGroupText>
-                        <CFormInput id="telefono" v-model="cliente.telefono" placeholder="Teléfono" required />
-                        <div class="invalid-feedback">El teléfono es obligatorio</div>
+                        <CFormInput id="telefono" v-model="cliente.telefono" placeholder="0900000000" required
+                          pattern="[0-9]{10}" />
+
+                        <div class="invalid-feedback">El teléfono es obligatorio y debe contener solo números</div>
                       </CInputGroup>
                     </div>
                   </CCol>
@@ -63,7 +66,8 @@
                       <label for="identificacion" class="form-label">Identificación</label>
                       <CInputGroup>
                         <CInputGroupText><i class="fas fa-id-badge"></i></CInputGroupText>
-                        <CFormInput id="identificacion" v-model="cliente.identificacion" placeholder="Identificación" required />
+                        <CFormInput id="identificacion" v-model="cliente.identificacion" placeholder="Identificación"
+                          required />
                         <div class="invalid-feedback">La identificación es obligatoria</div>
                       </CInputGroup>
                     </div>
@@ -117,9 +121,9 @@ export default {
       isLoading: false
     };
   },
+
   mounted() {
     this.negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId;
-
   },
   methods: {
     resetForm() {
@@ -135,32 +139,24 @@ export default {
       };
       this.wasValidated = false;
     },
+
     async registrarCliente() {
       this.wasValidated = true;
       this.errorMessage = '';
       this.successMessage = '';
 
-      // Validar que todos los campos estén completos
-      if (!this.cliente.nombres || !this.cliente.apellidos || !this.cliente.correo || !this.cliente.telefono ||
-        !this.cliente.identificacion || !this.cliente.tipoId || !this.cliente.direccion) {
-        this.errorMessage = 'Por favor, complete todos los campos obligatorios';
-        this.isLoading = false;
+      // Validar que todos los campos estén completos y sean válidos
+      if (!this.cliente.nombres || !this.cliente.apellidos || !this.cliente.correo ||
+        !this.cliente.identificacion || !this.cliente.tipoId ||
+        !this.cliente.direccion) {
+        this.errorMessage = 'Por favor, complete todos los campos obligatorios correctamente';
         return;
       }
 
-      // Validar que los campos cumplan con los patrones requeridos
+      // Validar el correo electrónico
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const phonePattern = /^[0-9]{10}$/;
-
       if (!emailPattern.test(this.cliente.correo)) {
         this.errorMessage = 'El correo no es válido';
-        this.isLoading = false;
-        return;
-      }
-
-      if (!phonePattern.test(this.cliente.telefono)) {
-        this.errorMessage = 'El teléfono no es válido';
-        this.isLoading = false;
         return;
       }
 
@@ -208,5 +204,15 @@ export default {
   margin-bottom: 0.25rem;
   display: block;
   text-align: left;
+}
+
+.is-invalid {
+  border-color: #dc3545;
+}
+
+/* Evitar que el input se ponga verde si no es válido */
+.form-control.is-invalid:valid {
+  border-color: #ced4da;
+  background-image: none;
 }
 </style>

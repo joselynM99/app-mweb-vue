@@ -12,25 +12,32 @@
           </CAlert>
           <div class="table-responsive">
             <div class="scroll-indicator">
-              <span class="arrow">←</span> Desliza para ver más <span class="arrow">→</span>
+              <span class="arrow"><i class="fas fa-arrow-left"></i></span> Desliza para ver más <span class="arrow"><i class="fas fa-arrow-right"></i></span>
             </div>
             <CTable v-if="usuarios.length > 0" hover>
               <CTableHead color="light">
                 <CTableRow>
                   <CTableHeaderCell scope="col" class="text-center">Acciones</CTableHeaderCell>
-                  <CTableHeaderCell scope="col">Nombre de Usuario</CTableHeaderCell>
-                  <CTableHeaderCell scope="col">Correo</CTableHeaderCell>
-                  <CTableHeaderCell scope="col">Rol</CTableHeaderCell>
-                  <CTableHeaderCell scope="col">Nombre</CTableHeaderCell>
-                  <CTableHeaderCell scope="col">Apellido</CTableHeaderCell>
-                  <CTableHeaderCell scope="col">Teléfono</CTableHeaderCell>
+                  <CTableHeaderCell
+                    v-for="column in columns"
+                    :key="column.key"
+                    scope="col"
+                    @click="sortBy(column.key)"
+                    style="cursor: pointer;"
+                  >
+                    {{ column.label }}
+                    <i v-if="sortKey !== column.key" class="fas fa-sort"></i>
+                    <span v-if="sortKey === column.key">
+                      <i :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
+                    </span>
+                  </CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
               <CTableBody>
-                <CTableRow v-for="usuario in usuarios" :key="usuario.id">
+                <CTableRow v-for="usuario in sortedUsuarios" :key="usuario.id">
                   <CTableDataCell class="text-center">
                     <div class="action-buttons">
-                      <CButton color="success" size="sm" @click="actualizarUsuario(usuario.nombreUsuario)">
+                      <CButton color="warning" size="sm" @click="actualizarUsuario(usuario.nombreUsuario)">
                         <i class="fas fa-edit"></i>
                       </CButton>
                       <CButton color="danger" size="sm" @click="confirmarEliminacion(usuario)">
@@ -38,12 +45,9 @@
                       </CButton>
                     </div>
                   </CTableDataCell>
-                  <CTableDataCell class="text-wrap">{{ usuario.nombreUsuario }}</CTableDataCell>
-                  <CTableDataCell class="text-wrap">{{ usuario.correo }}</CTableDataCell>
-                  <CTableDataCell class="text-wrap">{{ usuario.rol }}</CTableDataCell>
-                  <CTableDataCell class="text-wrap">{{ usuario.nombre }}</CTableDataCell>
-                  <CTableDataCell class="text-wrap">{{ usuario.apellido }}</CTableDataCell>
-                  <CTableDataCell class="text-wrap">{{ usuario.telefono }}</CTableDataCell>
+                  <CTableDataCell v-for="column in columns" :key="column.key" class="text-wrap">
+                    {{ usuario[column.key] }}
+                  </CTableDataCell>
                 </CTableRow>
               </CTableBody>
             </CTable>
@@ -73,7 +77,11 @@
 </template>
 
 <script>
-import { listarUsuariosPorNegocioFachada, eliminarUsuarioFachada } from '../../assets/js/usuarios'; // Importa las funciones necesarias
+import {
+  listarUsuariosPorNegocioFachada,
+  eliminarUsuarioFachada
+} from '../../assets/js/usuarios';
+import '@fortawesome/fontawesome-free/css/all.css'; // Import Font Awesome CSS
 
 export default {
   data() {
@@ -83,8 +91,37 @@ export default {
       isLoading: false,
       isDeleting: false,
       visibleConfirmacion: false,
-      usuarioSeleccionado: null
+      usuarioSeleccionado: null,
+      sortKey: '',
+      sortOrder: 'asc',
+      columns: [
+        { key: 'nombreUsuario', label: 'Nombre de Usuario' },
+        { key: 'correo', label: 'Correo' },
+        { key: 'rol', label: 'Rol' },
+        { key: 'nombre', label: 'Nombre' },
+        { key: 'apellido', label: 'Apellido' },
+        { key: 'telefono', label: 'Teléfono' }
+      ]
     };
+  },
+  computed: {
+    sortedUsuarios() {
+      const sorted = [...this.usuarios];
+      if (this.sortKey) {
+        sorted.sort((a, b) => {
+          let aValue = a[this.sortKey];
+          let bValue = b[this.sortKey];
+
+          if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+          if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+
+          if (aValue < bValue) return this.sortOrder === 'asc' ? -1 : 1;
+          if (aValue > bValue) return this.sortOrder === 'asc' ? 1 : -1;
+          return 0;
+        });
+      }
+      return sorted;
+    }
   },
   mounted() {
     this.fetchUsuarios();
@@ -93,11 +130,11 @@ export default {
     async fetchUsuarios() {
       this.isLoading = true;
       try {
-        const us = JSON.parse(sessionStorage.getItem('usuario')); // Parsear la cadena JSON a un objeto
+        const us = JSON.parse(sessionStorage.getItem('usuario'));
         const negocioId = us ? us.negocioId : null;
         if (negocioId) {
           const response = await listarUsuariosPorNegocioFachada(negocioId);
-          this.usuarios = response.filter(usuario => usuario.nombreUsuario !== us.nombreUsuario); // Filtrar el usuario actual
+          this.usuarios = response.filter(usuario => usuario.nombreUsuario !== us.nombreUsuario);
         } else {
           this.error = 'No se encontró el ID del negocio en la sesión.';
         }
@@ -114,7 +151,12 @@ export default {
     async eliminarUsuarioConfirmado() {
       this.isDeleting = true;
       try {
-        await eliminarUsuarioFachada(this.usuarioSeleccionado.keycloakId, JSON.parse(sessionStorage.getItem('usuario')).idNegocio);
+
+        console.log(this.usuarioSeleccionado.keycloakId);
+        console.log(JSON.parse(sessionStorage.getItem('usuario')).negocioId);
+
+        await eliminarUsuarioFachada(this.usuarioSeleccionado.keycloakId, JSON.parse(sessionStorage.getItem('usuario')).negocioId);
+
         this.usuarios = this.usuarios.filter(usuario => usuario.id !== this.usuarioSeleccionado.id);
         this.visibleConfirmacion = false;
         this.usuarioSeleccionado = null;
@@ -126,7 +168,18 @@ export default {
       }
     },
     actualizarUsuario(nombreUsuario) {
-      this.$router.push({ path: '/actualizar-usuario', query: { username: nombreUsuario } });
+      this.$router.push({
+        name: 'Actualizar Usuario',
+        query: { username: nombreUsuario }
+      });
+    },
+    sortBy(key) {
+      if (this.sortKey === key) {
+        this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.sortKey = key;
+        this.sortOrder = 'asc';
+      }
     }
   }
 };
@@ -187,6 +240,15 @@ export default {
 
   CTableHeaderCell {
     font-size: 0.9rem;
+  }
+
+  .table-responsive th {
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .table-responsive th:hover {
+    background-color: #f8f9fa;
   }
 }
 </style>

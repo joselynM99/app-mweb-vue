@@ -17,18 +17,20 @@
                         <CInputGroupText>
                           <i class="fas fa-user fa-fw"></i>
                         </CInputGroupText>
-                        <CFormInput id="nombreUsuario" v-model="usuario.nombreUsuario" placeholder="Nombre de usuario" autocomplete="username" required />
+                        <CFormInput id="nombreUsuario" v-model="usuario.nombreUsuario" placeholder="Nombre de usuario"
+                          autocomplete="username" required />
                         <div class="invalid-feedback">El nombre de usuario es obligatorio</div>
                       </CInputGroup>
                     </div>
 
                     <div class="mb-2">
-                      <label for="correo" class="form-label">Correo</label>
+                      <label for="correo" class="form-label">Correo electrónico</label>
                       <CInputGroup>
                         <CInputGroupText>
                           <i class="fas fa-envelope fa-fw"></i>
                         </CInputGroupText>
-                        <CFormInput id="correo" v-model="usuario.correo" type="email" placeholder="Email" autocomplete="email" required />
+                        <CFormInput id="correo" v-model="usuario.correo" type="email" placeholder="Email"
+                          autocomplete="email" required />
                         <div class="invalid-feedback">El correo es obligatorio y debe ser válido</div>
                       </CInputGroup>
                     </div>
@@ -41,7 +43,8 @@
                         </CInputGroupText>
                         <CFormSelect id="rol" v-model="usuario.rol" required>
                           <option disabled :selected="!usuario.rol" value="">Seleccione un rol</option>
-                          <option v-for="rol in filteredRoles" :key="rol.id" :value="rol.nombre">{{ rol.nombre }}</option>
+                          <option v-for="rol in filteredRoles" :key="rol.id" :value="rol.nombre">{{ rol.nombre }}
+                          </option>
                         </CFormSelect>
                         <div class="invalid-feedback">El rol es obligatorio</div>
                       </CInputGroup>
@@ -53,8 +56,11 @@
                         <CInputGroupText>
                           <i class="fas fa-lock fa-fw"></i>
                         </CInputGroupText>
-                        <CFormInput id="password" v-model="usuario.password" type="password" placeholder="Contraseña" autocomplete="new-password" required pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}" />
-                        <div class="invalid-feedback">La contraseña debe tener al menos 8 caracteres, incluyendo una letra mayúscula, una letra minúscula, un número y un carácter especial</div>
+                        <CFormInput id="password" v-model="usuario.password" type="password" placeholder="Contraseña"
+                          autocomplete="new-password" required
+                          pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}" />
+                        <div class="invalid-feedback">La contraseña debe tener al menos 8 caracteres, incluyendo una
+                          letra mayúscula, una letra minúscula, un número y un carácter especial</div>
                       </CInputGroup>
                     </div>
 
@@ -64,8 +70,10 @@
                         <CInputGroupText>
                           <i class="fas fa-lock fa-fw"></i>
                         </CInputGroupText>
-                        <CFormInput id="passwordConfirm" v-model="usuario.passwordConfirm" type="password" placeholder="Repita la contraseña" autocomplete="new-password" required />
-                        <div class="invalid-feedback">La confirmación de la contraseña es obligatoria y debe coincidir</div>
+                        <CFormInput id="passwordConfirm" v-model="usuario.passwordConfirm" type="password"
+                          placeholder="Repita la contraseña" autocomplete="new-password" required />
+                        <div class="invalid-feedback">La confirmación de la contraseña es obligatoria y debe coincidir
+                        </div>
                       </CInputGroup>
                     </div>
                   </CCol>
@@ -98,7 +106,8 @@
                         <CInputGroupText>
                           <i class="fas fa-phone-alt fa-fw"></i>
                         </CInputGroupText>
-                        <CFormInput id="telefono" v-model="usuario.telefono" type="tel" placeholder="Teléfono" required pattern="[0-9]{10}" />
+                        <CFormInput id="telefono" v-model="usuario.telefono" type="tel" placeholder="0900000000" required
+                          pattern="[0-9]{10}" />
                         <div class="invalid-feedback">El teléfono es obligatorio y debe contener solo números</div>
                       </CInputGroup>
                     </div>
@@ -110,7 +119,8 @@
                           <i class="fas fa-id-badge fa-fw"></i>
                         </CInputGroupText>
                         <CFormSelect id="tipoIdentificacion" v-model="usuario.tipoIdentificacion" required>
-                          <option disabled :selected="!usuario.tipoIdentificacion" value="">Seleccione un tipo de identificación</option>
+                          <option disabled :selected="!usuario.tipoIdentificacion" value="">Seleccione un tipo de
+                            identificación</option>
                           <option v-for="tipo in tiposIdentificacion" :key="tipo" :value="tipo">{{ tipo }}</option>
                         </CFormSelect>
                         <div class="invalid-feedback">El tipo de identificación es obligatorio</div>
@@ -123,13 +133,14 @@
                         <CInputGroupText>
                           <i class="fas fa-id-card fa-fw"></i>
                         </CInputGroupText>
-                        <CFormInput id="identificacion" v-model="usuario.identificacion" placeholder="Identificación" required />
+                        <CFormInput id="identificacion" v-model="usuario.identificacion" placeholder="Identificación"
+                          required />
                         <div class="invalid-feedback">La identificación es obligatoria</div>
                       </CInputGroup>
                     </div>
                   </CCol>
                 </CRow>
-                <div class="d-grid" style="width:35%; margin: 5px auto;">
+                <div class="d-grid" style="width:30%; margin: 5px auto;">
                   <CButton color="success" type="submit" :disabled="isLoading">
                     Registrar
                     <CSpinner v-if="isLoading" color="light" class="spinner-border-sm" />

@@ -145,7 +145,7 @@
                     </div>
                   </CCol>
                 </CRow>
-                <div class="d-grid" style="width:35%; margin: 5px auto;">
+                <div class="d-grid" style="width:30%; margin: 5px auto;">
                   <CButton color="success" type="submit" :disabled="isLoadingActualizar">
                     Actualizar
                     <CSpinner v-if="isLoadingActualizar" color="light" class="spinner-border-sm" />

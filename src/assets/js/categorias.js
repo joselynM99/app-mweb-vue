@@ -7,7 +7,9 @@ const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  responseType: 'json',
+  responseEncoding: 'utf8'
 });
 
 apiClient.interceptors.request.use(config => {

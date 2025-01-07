@@ -37,6 +37,7 @@ export const listarUsuariosPorNegocioFachada = async (negocioId) => {
   return await listarUsuariosPorNegocio(negocioId);
 };
 
+
 export const eliminarUsuarioFachada = async (usuarioId, idNegocio) => {
   return await eliminarUsuario(usuarioId, idNegocio);
 };

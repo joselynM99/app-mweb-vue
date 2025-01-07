@@ -3,7 +3,7 @@
     <CCol :xs="12">
       <CCard class="mb-4">
         <CCardHeader>
-          <strong style="margin-right:5px;">Productos</strong>
+          <strong style="margin-right:5px;">Subproductos</strong>
           <CSpinner v-if="isLoading" color="success" class="spinner-border-sm" />
         </CCardHeader>
         <CCardBody>
@@ -22,9 +22,9 @@
                     <CCol md="3">
                       <div class="filter-item">
                         <label>Marca:</label>
-                        <select v-model="filtros.marca" @change="filtrarProductos" class="form-select">
+                        <select v-model="filtros.marca" @change="filtrarSubproductos" class="form-select">
                           <option value="">Todas</option>
-                          <option v-for="marca in [...new Set(productos.map(p => p.marca))]" :key="marca"
+                          <option v-for="marca in [...new Set(subproductos.map(p => p.marca))]" :key="marca"
                             :value="marca">{{ marca }}</option>
                         </select>
                       </div>
@@ -32,9 +32,9 @@
                     <CCol md="3">
                       <div class="filter-item">
                         <label>Categoría:</label>
-                        <select v-model="filtros.categoria" @change="filtrarProductos" class="form-select">
+                        <select v-model="filtros.categoria" @change="filtrarSubproductos" class="form-select">
                           <option value="">Todas</option>
-                          <option v-for="categoria in [...new Set(productos.map(p => p.categoria))]" :key="categoria"
+                          <option v-for="categoria in [...new Set(subproductos.map(p => p.categoria))]" :key="categoria"
                             :value="categoria">{{ categoria }}</option>
                         </select>
                       </div>
@@ -42,9 +42,9 @@
                     <CCol md="3">
                       <div class="filter-item">
                         <label>Proveedor:</label>
-                        <select v-model="filtros.proveedor" @change="filtrarProductos" class="form-select">
+                        <select v-model="filtros.proveedor" @change="filtrarSubproductos" class="form-select">
                           <option value="">Todos</option>
-                          <option v-for="proveedor in [...new Set(productos.map(p => p.proveedor))]" :key="proveedor"
+                          <option v-for="proveedor in [...new Set(subproductos.map(p => p.proveedor))]" :key="proveedor"
                             :value="proveedor">{{ proveedor }}</option>
                         </select>
                       </div>
@@ -52,9 +52,9 @@
                     <CCol md="3">
                       <div class="filter-item">
                         <label>Impuesto:</label>
-                        <select v-model="filtros.impuesto" @change="filtrarProductos" class="form-select">
+                        <select v-model="filtros.impuesto" @change="filtrarSubproductos" class="form-select">
                           <option value="">Todos</option>
-                          <option v-for="impuesto in [...new Set(productos.map(p => p.impuesto))]" :key="impuesto"
+                          <option v-for="impuesto in [...new Set(subproductos.map(p => p.impuesto))]" :key="impuesto"
                             :value="impuesto">{{ impuesto }}</option>
                         </select>
                       </div>
@@ -65,9 +65,9 @@
             </CCollapse>
           </div>
           <CInputGroup class="mt-3 mb-4" style="width: 100%;">
-            <CFormInput v-model="searchQuery" @input="debouncedBuscarProductos" placeholder="Buscar por nombre" />
+            <CFormInput v-model="searchQuery" @input="debouncedBuscarSubproductos" placeholder="Buscar por nombre" />
             <CInputGroupText style="padding:0px 5px">
-              <button @click="buscarProductos" :disabled="isLoading"
+              <button @click="buscarSubproductos" :disabled="isLoading"
                 style="border: none; background: none; margin:0px; padding:5px">
                 Buscar
                 <CSpinner v-if="isLoading" color="light" class="spinner-border-sm" />
@@ -78,7 +78,7 @@
             <div class="scroll-indicator">
               <span class="arrow"><i class="fas fa-arrow-left"></i></span> Desliza para ver más <span class="arrow"><i class="fas fa-arrow-right"></i></span>
             </div>
-            <CTable v-if="sortedProductos.length > 0" hover>
+            <CTable v-if="sortedSubproductos.length > 0" hover>
               <CTableHead color="light">
                 <CTableRow>
                   <CTableHeaderCell scope="col" class="text-center">Acciones</CTableHeaderCell>
@@ -127,30 +127,30 @@
                 </CTableRow>
               </CTableHead>
               <CTableBody>
-                <CTableRow v-for="producto in sortedProductos" :key="producto.codigoBarras"
-                  :class="{ 'table-danger': producto.stockActual <= 0 }">
+                <CTableRow v-for="subproducto in sortedSubproductos" :key="subproducto.codigoBarras"
+                  :class="{ 'table-danger': subproducto.stockActual <= 0 }">
                   <CTableDataCell class="text-center">
                     <div class="action-buttons">
-                      <CButton color="warning" size="sm" @click="actualizarProducto(producto.codigoBarras)">
+                      <CButton color="warning" size="sm" @click="actualizarSubproducto(subproducto.codigoBarras)">
                         <i class="fas fa-edit"></i>
                       </CButton>
-                      <CButton color="danger" size="sm" @click="confirmarDesactivacion(producto)">
+                      <CButton color="danger" size="sm" @click="confirmarDesactivacion(subproducto)">
                         <i class="fas fa-trash-alt"></i>
                       </CButton>
                     </div>
                   </CTableDataCell>
-                  <CTableDataCell class="text-wrap">{{ producto.codigoBarras }}</CTableDataCell>
-                  <CTableDataCell class="text-wrap">{{ producto.nombre }}</CTableDataCell>
-                  <CTableDataCell class="text-wrap">{{ producto.descripcion }}</CTableDataCell>
-                  <CTableDataCell class="text-wrap">{{ producto.costoPromedio }}</CTableDataCell>
-                  <CTableDataCell class="text-wrap">{{ producto.precioVenta }}</CTableDataCell>
-                  <CTableDataCell class="text-wrap">{{ producto.stockActual }}</CTableDataCell>
+                  <CTableDataCell class="text-wrap">{{ subproducto.codigoBarras }}</CTableDataCell>
+                  <CTableDataCell class="text-wrap">{{ subproducto.nombre }}</CTableDataCell>
+                  <CTableDataCell class="text-wrap">{{ subproducto.descripcion }}</CTableDataCell>
+                  <CTableDataCell class="text-wrap">{{ subproducto.costoPromedio }}</CTableDataCell>
+                  <CTableDataCell class="text-wrap">{{ subproducto.precioVenta }}</CTableDataCell>
+                  <CTableDataCell class="text-wrap">{{ subproducto.stockActual }}</CTableDataCell>
                 </CTableRow>
               </CTableBody>
             </CTable>
           </div>
-          <CAlert v-if="!sortedProductos.length && !error && !isLoading && !infoMessage" color="info">
-            No se encontraron productos.
+          <CAlert v-if="!sortedSubproductos.length && !error && !isLoading && !infoMessage" color="info">
+            No se encontraron subproductos.
           </CAlert>
         </CCardBody>
       </CCard>
@@ -161,10 +161,10 @@
       <CModalHeader @close="visibleConfirmacion = false">
         <CModalTitle>Confirmar eliminación</CModalTitle>
       </CModalHeader>
-      <CModalBody>¿Estás seguro de que deseas eliminar este producto?</CModalBody>
+      <CModalBody>¿Estás seguro de que deseas eliminar este subproducto?</CModalBody>
       <CModalFooter>
         <CButton color="secondary" @click="visibleConfirmacion = false">Cancelar</CButton>
-        <CButton color="danger" @click="desactivarProductoConfirmado">
+        <CButton color="danger" @click="desactivarSubproductoConfirmado">
           Eliminar
           <CSpinner v-if="isDeleting" color="light" class="spinner-border-sm" />
         </CButton>
@@ -176,21 +176,21 @@
 <script>
 import { debounce } from 'lodash';
 import {
-  listaProductosFachada,
-  listaProductosPorNombreFachada,
-  desactivarProductoFachada,
-} from '@/assets/js/productos';
+  listaSubproductosFachada,
+  listaSubproductosPorNombreFachada,
+  desactivarSubproductoFachada,
+} from '@/assets/js/subproductos';
 
 export default {
   data() {
     return {
       searchQuery: '',
-      productos: [],
+      subproductos: [],
       isLoading: false,
       error: null,
       infoMessage: null,
       isDeleting: false,
-      productoSeleccionado: null,
+      subproductoSeleccionado: null,
       visibleConfirmacion: false,
       filtros: {
         marca: '',
@@ -203,8 +203,8 @@ export default {
     };
   },
   computed: {
-    sortedProductos() {
-      const sorted = [...this.filtrarProductos()];
+    sortedSubproductos() {
+      const sorted = [...this.filtrarSubproductos()];
       if (this.sortKey) {
         sorted.sort((a, b) => {
           let aValue = a[this.sortKey];
@@ -226,28 +226,28 @@ export default {
     }
   },
   methods: {
-    async fetchProductos() {
+    async fetchSubproductos() {
       this.isLoading = true;
       this.error = null;
       this.infoMessage = null;
       try {
         const negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId;
-        this.productos = await listaProductosFachada(negocioId);
-        console.log(this.productos);
+        this.subproductos = await listaSubproductosFachada(negocioId);
+        console.log(this.subproductos);
 
       } catch (err) {
         if (err.response && err.response.status === 404) {
-          this.infoMessage = 'No se encontraron productos';
+          this.infoMessage = 'No se encontraron subproductos';
         } else {
-          this.error = 'Error al cargar productos. Inténtalo de nuevo más tarde.';
+          this.error = 'Error al cargar subproductos. Inténtalo de nuevo más tarde.';
         }
       } finally {
         this.isLoading = false;
       }
     },
-    async buscarProductos() {
+    async buscarSubproductos() {
       if (!this.searchQuery) {
-        this.fetchProductos();
+        this.fetchSubproductos();
         return;
       }
 
@@ -256,42 +256,42 @@ export default {
       this.infoMessage = null;
       try {
         const negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId;
-        this.productos = await listaProductosPorNombreFachada(this.searchQuery, negocioId);
+        this.subproductos = await listaSubproductosPorNombreFachada(this.searchQuery, negocioId);
       } catch (err) {
         if (err.response && err.response.status === 404) {
-          this.infoMessage = 'No se encontraron productos con el nombre especificado';
+          this.infoMessage = 'No se encontraron subproductos con el nombre especificado';
         } else {
-          this.error = 'Error al buscar productos. Inténtalo de nuevo más tarde.';
+          this.error = 'Error al buscar subproductos. Inténtalo de nuevo más tarde.';
         }
       } finally {
         this.isLoading = false;
       }
     },
-    filtrarProductos() {
-      return this.productos.filter(producto => {
+    filtrarSubproductos() {
+      return this.subproductos.filter(subproducto => {
         return (
-          (!this.filtros.marca || producto.marca === this.filtros.marca) &&
-          (!this.filtros.categoria || producto.categoria === this.filtros.categoria) &&
-          (!this.filtros.proveedor || producto.proveedor === this.filtros.proveedor) &&
-          (!this.filtros.impuesto || producto.impuesto === this.filtros.impuesto)
+          (!this.filtros.marca || subproducto.marca === this.filtros.marca) &&
+          (!this.filtros.categoria || subproducto.categoria === this.filtros.categoria) &&
+          (!this.filtros.proveedor || subproducto.proveedor === this.filtros.proveedor) &&
+          (!this.filtros.impuesto || subproducto.impuesto === this.filtros.impuesto)
         );
       });
     },
-    actualizarProducto(codigoBarras) {
-      this.$router.push({ name: 'Actualizar Productos', query: { codigoBarras } });
+    actualizarSubproducto(codigoBarras) {
+      this.$router.push({ name: 'Actualizar Subproducto', query: { codigoBarras } });
     },
-    confirmarDesactivacion(producto) {
-      this.productoSeleccionado = producto;
+    confirmarDesactivacion(subproducto) {
+      this.subproductoSeleccionado = subproducto;
       this.visibleConfirmacion = true;
     },
-    async desactivarProductoConfirmado() {
+    async desactivarSubproductoConfirmado() {
       this.isDeleting = true;
       try {
-        await desactivarProductoFachada(this.productoSeleccionado.id);
-        this.productos = this.productos.filter(p => p.codigoBarras !== this.productoSeleccionado.codigoBarras);
+        await desactivarSubproductoFachada(this.subproductoSeleccionado.id);
+        this.subproductos = this.subproductos.filter(p => p.codigoBarras !== this.subproductoSeleccionado.codigoBarras);
         this.visibleConfirmacion = false;
       } catch (err) {
-        this.error = 'Error al desactivar el producto. Inténtalo de nuevo más tarde.';
+        this.error = 'Error al desactivar el subproducto. Inténtalo de nuevo más tarde.';
       } finally {
         this.isDeleting = false;
       }
@@ -304,17 +304,17 @@ export default {
         this.sortOrder = 'asc';
       }
     },
-    debouncedBuscarProductos: debounce(function () {
-      this.buscarProductos();
+    debouncedBuscarSubproductos: debounce(function () {
+      this.buscarSubproductos();
     }, 300)
   },
   watch: {
     searchQuery() {
-      this.debouncedBuscarProductos();
+      this.debouncedBuscarSubproductos();
     },
   },
   mounted() {
-    this.fetchProductos();
+    this.fetchSubproductos();
   }
 };
 </script>

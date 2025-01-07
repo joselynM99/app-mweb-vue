@@ -16,7 +16,7 @@ export default {
       KeycloakService.logout();
     },
     goToProfile() {
-      this.$router.push({ path: '/actualizar-usuario', query: { username: this.username } });
+      this.$router.push({ name: 'Actualizar Usuario', query: { username: this.username } });
     }
   }
 };

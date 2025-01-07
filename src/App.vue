@@ -32,6 +32,7 @@ onBeforeMount(() => {
 
 <template>
   <router-view />
+  <meta charset="UTF-8">
 </template>
 
 <style lang="scss">

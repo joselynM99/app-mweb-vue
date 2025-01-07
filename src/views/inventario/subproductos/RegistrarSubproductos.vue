@@ -9,7 +9,7 @@
                 <CSpinner color="success" />
                 <p>Cargando...</p>
               </div>
-              <CForm @submit.prevent="registrarProducto" novalidate :class="{ 'was-validated': wasValidated }">
+              <CForm @submit.prevent="registrarSubproducto" novalidate :class="{ 'was-validated': wasValidated }">
                 <CAlert v-if="successMessage" color="success">{{ successMessage }}</CAlert>
                 <CAlert v-if="errorMessage" color="danger">{{ errorMessage }}</CAlert>
                 <CRow>
@@ -18,8 +18,7 @@
                       <label for="codigoBarras" class="form-label">Código de Barras</label>
                       <CInputGroup>
                         <CInputGroupText><i class="fas fa-barcode"></i></CInputGroupText>
-                        <CFormInput id="codigoBarras" v-model="producto.codigoBarras" required />
-
+                        <CFormInput id="codigoBarras" v-model="subproducto.codigoBarras" required />
                         <div class="invalid-feedback">El código de barras es obligatorio</div>
                         <CInputGroupText style="padding:0px 5px">
                           <button type="button" @click="abrirCamara" :disabled="isLoading"
@@ -29,17 +28,14 @@
                           </button>
                         </CInputGroupText>
                       </CInputGroup>
-
-
                     </div>
-                    <!-- Aquí ajustamos el área de vista previa del escáner -->
                     <div id="scanner-container" style="width: 100%; height: auto; display: none;"></div>
 
                     <div class="mb-2">
                       <label for="nombre" class="form-label">Nombre</label>
                       <CInputGroup>
                         <CInputGroupText><i class="fas fa-tag"></i></CInputGroupText>
-                        <CFormInput id="nombre" v-model="producto.nombre" required />
+                        <CFormInput id="nombre" v-model="subproducto.nombre" required />
                         <div class="invalid-feedback">El nombre es obligatorio</div>
                       </CInputGroup>
                     </div>
@@ -48,66 +44,51 @@
                       <label for="descripcion" class="form-label">Descripción</label>
                       <CInputGroup>
                         <CInputGroupText><i class="fas fa-info-circle"></i></CInputGroupText>
-                        <CFormInput id="descripcion" v-model="producto.descripcion" />
+                        <CFormInput id="descripcion" v-model="subproducto.descripcion" />
                       </CInputGroup>
                     </div>
 
                     <div class="mb-2">
-                      <label for="proveedor" class="form-label">Proveedor</label>
+                      <label for="producto" class="form-label">Producto - Costo Promedio</label>
                       <CInputGroup>
-                        <CInputGroupText><i class="fas fa-truck"></i></CInputGroupText>
-                        <CFormSelect id="proveedor" v-model="producto.proveedor" :disabled="isLoadingListas">
-                          <option :value="null">Seleccione un proveedor</option>
-                          <option v-for="proveedor in proveedores" :key="proveedor.identificacion"
-                            :value="proveedor.identificacion">
-                            {{ proveedor.nombreComercial }}
+                        <CInputGroupText><i class="fas fa-box"></i></CInputGroupText>
+                        <CFormSelect id="producto" v-model="subproducto.producto" required>
+                          <option value="" disabled selected>Seleccione un producto</option>
+                          <option v-for="producto in productos" :key="producto.codigoBarras"
+                            :value="producto.codigoBarras">
+                            {{ producto.nombre + " - " + "$" + producto.costoPromedio }}
                           </option>
                         </CFormSelect>
+                        <div class="invalid-feedback">El producto es obligatorio</div>
                       </CInputGroup>
                     </div>
 
                     <div class="mb-2">
-                      <label for="categoria" class="form-label">Categoría</label>
+                      <label for="cantidadRelacionada" class="form-label">Cantidad Relacionada</label>
                       <CInputGroup>
-                        <CInputGroupText><i class="fas fa-list"></i></CInputGroupText>
-                        <CFormSelect id="categoria" v-model="producto.categoria" :disabled="isLoadingListas">
-                          <option :value="null">Seleccione una categoría</option>
-                          <option v-for="categoria in categorias" :key="categoria.id" :value="categoria.id">
-                            {{ categoria.nombre }}
-                          </option>
-                        </CFormSelect>
+                        <CInputGroupText><i class="fas fa-sort-numeric-up"></i></CInputGroupText>
+                        <CFormInput id="cantidadRelacionada" v-model.number="subproducto.cantidadRelacionada"
+                          @keyup="handleCantidadInput" required min="1" />
+                        <div class="invalid-feedback">La cantidad relacionada es obligatoria y debe ser mayor que 0
+                        </div>
                       </CInputGroup>
                     </div>
 
                     <div class="mb-2">
-                      <label for="marca" class="form-label">Marca</label>
+                      <label for="costoPromedio" class="form-label">Costo Promedio</label>
                       <CInputGroup>
-                        <CInputGroupText><i class="fas fa-tag"></i></CInputGroupText>
-                        <CFormSelect id="marca" v-model="producto.marca" :disabled="isLoadingListas">
-                          <option :value="null">Seleccione una marca</option>
-                          <option v-for="marca in marcas" :key="marca.id" :value="marca.id">
-                            {{ marca.nombre }}
-                          </option>
-                        </CFormSelect>
+                        <CInputGroupText><i class="fas fa-dollar-sign"></i></CInputGroupText>
+                        <CFormInput id="costoPromedio" v-model="subproducto.costoPromedio" readonly />
                       </CInputGroup>
                     </div>
                   </CCol>
                   <CCol md="6">
                     <div class="mb-2">
-                      <label for="costoPromedio" class="form-label">Costo Promedio</label>
-                      <CInputGroup>
-                        <CInputGroupText><i class="fas fa-dollar-sign"></i></CInputGroupText>
-                        <CFormInput id="costoPromedio" v-model="producto.costoPromedio" @input="validateAndCalculate"
-                          required />
-                        <div class="invalid-feedback">El costo promedio es obligatorio</div>
-                      </CInputGroup>
-                    </div>
-
-                    <div class="mb-2">
                       <label for="utilidad" class="form-label">Utilidad</label>
                       <CInputGroup>
                         <CInputGroupText><i class="fas fa-percentage"></i></CInputGroupText>
-                        <CFormInput id="utilidad" v-model="producto.utilidad" @input="validateAndCalculate" required />
+                        <CFormInput id="utilidad" v-model="subproducto.utilidad" @input="validateAndCalculate"
+                          required />
                         <CFormSelect v-model="tipoUtilidad" @change="validateAndCalculate">
                           <option value="porcentaje">Porcentaje</option>
                           <option value="valor">Valor</option>
@@ -120,15 +101,16 @@
                       <label for="precioSinImpuestos" class="form-label">Precio Sin Impuestos</label>
                       <CInputGroup>
                         <CInputGroupText><i class="fas fa-dollar-sign"></i></CInputGroupText>
-                        <CFormInput id="precioSinImpuestos" v-model="producto.precioSinImpuestos" readonly />
+                        <CFormInput id="precioSinImpuestos" v-model="subproducto.precioSinImpuestos" readonly />
                       </CInputGroup>
                     </div>
+
                     <div class="mb-2">
                       <label for="impuesto" class="form-label">Impuesto</label>
                       <CInputGroup>
-                        <CInputGroupText><i class="fas fa-receipt"></i></CInputGroupText>
-                        <CFormSelect id="impuesto" v-model="producto.impuesto" @change="validateAndCalculate" required
-                          :disabled="isLoadingListas">
+                        <CInputGroupText><i class="fas fa-percentage"></i></CInputGroupText>
+                        <CFormSelect id="impuesto" v-model="subproducto.impuesto" @change="validateAndCalculate"
+                          required :disabled="isLoadingListas">
                           <option :value="null" disabled selected>Seleccione un impuesto</option>
                           <option v-for="impuesto in impuestos" :key="impuesto.id" :value="impuesto.id">
                             {{ impuesto.tipoImpuesto }} - {{ impuesto.valor }}%
@@ -139,10 +121,10 @@
                     </div>
 
                     <div class="mb-2">
-                      <label for="precioVenta" class="form-label">Precio de Venta</label>
+                      <label for="precioVenta" class="form-label">Precio Venta</label>
                       <CInputGroup>
-                        <CInputGroupText><i class="fas fa-dollar-sign"></i></CInputGroupText>
-                        <CFormInput id="precioVenta" v-model="producto.precioVenta" readonly />
+                        <CInputGroupText><i class="fas fa-money-bill-wave"></i></CInputGroupText>
+                        <CFormInput id="precioVenta" v-model="subproducto.precioVenta" readonly />
                       </CInputGroup>
                     </div>
 
@@ -150,21 +132,38 @@
                       <label for="stockActual" class="form-label">Stock Actual</label>
                       <CInputGroup>
                         <CInputGroupText><i class="fas fa-boxes"></i></CInputGroupText>
-                        <CFormInput id="stockActual" v-model="producto.stockActual" @input="validateAndCalculate"
-                          required />
+                        <CFormInput id="stockActual" v-model="subproducto.stockActual" readonly />
                         <div class="invalid-feedback">El stock actual es obligatorio</div>
+                      </CInputGroup>
+                    </div>
+
+                    <div class="mb-2">
+                      <label for="categoria" class="form-label">Categoría</label>
+                      <CInputGroup>
+                        <CInputGroupText><i class="fas fa-list"></i></CInputGroupText>
+                        <CFormSelect id="categoria" v-model="subproducto.categoria" required>
+                          <option :value="null" disabled selected>Seleccione una categoría</option>
+                          <option v-for="categoria in categorias" :key="categoria.id" :value="categoria.id">
+                            {{ categoria.nombre }}
+                          </option>
+                        </CFormSelect>
+                        <div class="invalid-feedback">La categoría es obligatoria</div>
                       </CInputGroup>
                     </div>
                   </CCol>
                 </CRow>
                 <div class="d-grid" style="width:30%; margin: 2px auto;">
-                  <CButton color="success" type="submit" :disabled="isLoading">
+                  <CButton type="submit" color="success" :disabled="isLoading">
                     Registrar
                     <CSpinner v-if="isLoading" color="light" class="spinner-border-sm" />
                   </CButton>
                 </div>
               </CForm>
 
+              <div v-if="subproducto.producto && subproducto.cantidadRelacionada">
+                <p>{{ subproducto.cantidadRelacionada }} {{
+                  subproducto.nombre }} equivale a 1 {{ productoSeleccionado.nombre }}</p>
+              </div>
             </CCardBody>
           </CCard>
         </CCol>
@@ -175,10 +174,9 @@
 
 <script>
 import { debounce } from 'lodash';
-import { registrarProductoFachada } from '@/assets/js/productos';
-import { listaProveedoresFachada } from '@/assets/js/proveedor';
+import { registrarSubproductoFachada } from '@/assets/js/subproductos';
+import { listaProductosFachada, obtenerProductoCodigoBarrasFachada } from '@/assets/js/productos';
 import { listaCategoriasFachada } from '@/assets/js/categorias';
-import { listaMarcasFachada } from '@/assets/js/marcas';
 import { listaImpuestosFachada } from '@/assets/js/impuestos';
 import Quagga from 'quagga'; // Importamos QuaggaJS
 import '@fortawesome/fontawesome-free/css/all.css'; // Importamos Font Awesome
@@ -187,7 +185,7 @@ export default {
   data() {
     return {
       negocioId: null,
-      producto: {
+      subproducto: {
         codigoBarras: '',
         nombre: '',
         descripcion: '',
@@ -197,17 +195,17 @@ export default {
         precioVenta: 0,
         stockActual: 0,
         activo: true,
-        proveedor: null,
+        producto: '',
+        cantidadRelacionada: 0,
         impuesto: null,
         categoria: null,
-        marca: null,
         idNegocio: null
       },
       tipoUtilidad: 'porcentaje',
-      proveedores: [],
+      productos: [],
       categorias: [],
-      marcas: [],
       impuestos: [],
+      productoSeleccionado: null,
       successMessage: '',
       errorMessage: '',
       wasValidated: false,
@@ -215,12 +213,24 @@ export default {
       isLoadingListas: true // Nueva variable para controlar el estado de carga de las listas
     };
   },
+
+  watch: {
+    'subproducto.producto'(newValue) {
+      if (newValue) {
+        this.obtenerCostoPromedioProducto();
+      }
+    },
+    'subproducto.cantidadRelacionada'(newValue) {
+      if (newValue > 0) {
+        this.calcularStockSubproducto();
+      }
+    }
+  },
   mounted() {
     this.negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId;
     this.cargarListas();
   },
   methods: {
-
     mostrarContenedorEscaner() {
       document.getElementById('scanner-container').style.display = 'block';
     },
@@ -268,7 +278,7 @@ export default {
 
     manejarDeteccion(result) {
       if (result && result.codeResult && result.codeResult.code) {
-        this.producto.codigoBarras = result.codeResult.code;
+        this.subproducto.codigoBarras = result.codeResult.code;
         Quagga.stop();
         document.getElementById('scanner-container').style.display = 'none';
       }
@@ -279,76 +289,103 @@ export default {
       this.configurarQuagga();
       Quagga.onDetected(this.manejarDeteccion);
     },
+
     async cargarListas() {
       this.isLoadingListas = true; // Mostrar el spinner mientras se cargan las listas
       try {
         // Manejar cada llamada de manera independiente
         try {
-          this.proveedores = await listaProveedoresFachada(this.negocioId);
+          this.productos = await listaProductosFachada(this.negocioId);
         } catch (error) {
-          if (error.response && error.response.status === 404) {
-            console.warn('Proveedores no encontrados (404)');
-          } else {
-            console.error('Error al cargar proveedores:', error);
-          }
+          console.error('Error al cargar productos:', error);
         }
 
         try {
           this.categorias = await listaCategoriasFachada(this.negocioId);
         } catch (error) {
-          if (error.response && error.response.status === 404) {
-            console.warn('Categorías no encontradas (404)');
-          } else {
-            console.error('Error al cargar categorías:', error);
-          }
-        }
-
-        try {
-          this.marcas = await listaMarcasFachada(this.negocioId);
-        } catch (error) {
-          if (error.response && error.response.status === 404) {
-            console.warn('Marcas no encontradas (404)');
-          } else {
-            console.error('Error al cargar marcas:', error);
-          }
+          console.error('Error al cargar categorías:', error);
         }
 
         try {
           this.impuestos = await listaImpuestosFachada();
         } catch (error) {
-          if (error.response && error.response.status === 404) {
-            console.warn('Impuestos no encontrados (404)');
-          } else {
-            console.error('Error al cargar impuestos:', error);
-          }
+          console.error('Error al cargar impuestos:', error);
         }
       } finally {
         this.isLoadingListas = false; // Ocultar el spinner cuando las listas se hayan cargado
       }
     },
 
+
+    async obtenerCostoPromedioProducto() {
+      try {
+        console.log("codigo", this.subproducto.producto);
+
+        const producto = await obtenerProductoCodigoBarrasFachada(this.subproducto.producto, this.negocioId);
+        this.productoSeleccionado = producto;
+        this.calcularCostoPromedioSubproducto();
+        this.calcularStockSubproducto();
+      } catch (error) {
+        console.error('Error al obtener costo promedio del producto:', error);
+      }
+    },
+
+    handleCantidadInput() {
+      if (!this.productoSeleccionado) {
+        this.subproducto.cantidadRelacionada = 0;
+        return;
+      }
+      this.calcularCostoPromedioSubproducto();
+      this.calcularStockSubproducto();
+    },
+
+    calcularCostoPromedioSubproducto() {
+      const cantidadRelacionada = parseFloat(this.subproducto.cantidadRelacionada) || 0;
+      const costoPromedioProducto = parseFloat(this.productoSeleccionado.costoPromedio) || 0;
+      console.log("cantidadRelacionada", cantidadRelacionada);
+      console.log("costoPromedioProducto", costoPromedioProducto);
+      if (cantidadRelacionada > 0) {
+        this.subproducto.costoPromedio = (costoPromedioProducto / cantidadRelacionada).toFixed(2);
+      } else {
+        this.subproducto.costoPromedio = 0;
+      }
+      this.calcularPrecios();
+    },
+
+    calcularStockSubproducto() {
+      const cantidadRelacionada = parseFloat(this.subproducto.cantidadRelacionada) || 0;
+      const stockProducto = parseInt(this.productoSeleccionado.stockActual) || 0;
+      if (cantidadRelacionada > 0) {
+        this.subproducto.stockActual = Math.floor(stockProducto * cantidadRelacionada);
+      } else {
+        this.subproducto.stockActual = 0;
+      }
+    },
+
     calcularPrecios() {
-      const costoPromedio = parseFloat(this.producto.costoPromedio) || 0;
-      const impuesto = this.impuestos.find(i => i.id === Number(this.producto.impuesto));
+      const costoPromedio = parseFloat(this.subproducto.costoPromedio) || 0;
+      const impuesto = this.impuestos.find(i => i.id === Number(this.subproducto.impuesto));
       const valorImpuesto = impuesto ? impuesto.valor / 100 : 0;
 
       if (this.tipoUtilidad === 'porcentaje') {
-        const margenBeneficio = parseFloat(this.producto.utilidad) / 100 || 0;
-        this.producto.precioSinImpuestos = (costoPromedio * (1 + margenBeneficio)).toFixed(2);
+        const margenBeneficio = parseFloat(this.subproducto.utilidad) / 100 || 0;
+        this.subproducto.precioSinImpuestos = (costoPromedio * (1 + margenBeneficio)).toFixed(2);
       } else {
-        const valorUtilidad = parseFloat(this.producto.utilidad) || 0;
-        this.producto.precioSinImpuestos = (costoPromedio + valorUtilidad).toFixed(2);
+        const valorUtilidad = parseFloat(this.subproducto.utilidad) || 0;
+        this.subproducto.precioSinImpuestos = (costoPromedio + valorUtilidad).toFixed(2);
       }
 
-      this.producto.precioVenta = (this.producto.precioSinImpuestos * (1 + valorImpuesto)).toFixed(2);
+      this.subproducto.precioVenta = (this.subproducto.precioSinImpuestos * (1 + valorImpuesto)).toFixed(2);
     },
+
     validateAndCalculate: debounce(function (event) {
       const value = event.target.value.replace(',', '.');
       event.target.value = value;
       this.calcularPrecios();
     }, 300),
+
     resetForm() {
-      this.producto = {
+      this.subproducto = {
         codigoBarras: '',
         nombre: '',
         descripcion: '',
@@ -358,28 +395,30 @@ export default {
         precioVenta: 0,
         stockActual: 0,
         activo: true,
-        proveedor: null,
+        producto: null,
+        cantidadRelacionada: 0,
         impuesto: null,
         categoria: null,
-        marca: null,
         idNegocio: this.negocioId
       };
       this.wasValidated = false;
     },
-    async registrarProducto() {
+
+    async registrarSubproducto() {
       this.wasValidated = true;
       this.errorMessage = '';
       this.successMessage = '';
-      this.producto.idNegocio = this.negocioId;
+      this.subproducto.idNegocio = this.negocioId;
+
       // Validar que todos los campos obligatorios estén completos
-      if (!this.producto.codigoBarras || !this.producto.nombre || !this.producto.costoPromedio || this.producto.stockActual === null || this.producto.impuesto === null) {
-        this.errorMessage = 'Por favor, complete todos los campos obligatorios';
+      if (!this.subproducto.codigoBarras || !this.subproducto.nombre || !this.subproducto.costoPromedio || this.subproducto.stockActual === null || this.subproducto.impuesto === null || !this.subproducto.producto || this.subproducto.cantidadRelacionada <= 0) {
+        this.errorMessage = 'Por favor, complete todos los campos obligatorios y asegúrese de que la cantidad relacionada sea mayor que 0';
         this.isLoading = false;
         return;
       }
 
       // Validar que los campos cumplan con los patrones requeridos
-      if (isNaN(this.producto.costoPromedio) || isNaN(this.producto.stockActual)) {
+      if (isNaN(this.subproducto.costoPromedio) || isNaN(this.subproducto.stockActual)) {
         this.errorMessage = 'El costo promedio y el stock actual deben ser números válidos';
         this.isLoading = false;
         return;
@@ -388,9 +427,10 @@ export default {
       // Si todos los campos son válidos, proceder con el registro
       this.isLoading = true;
       try {
-        const response = await registrarProductoFachada(this.producto);
-        this.successMessage = 'Producto registrado exitosamente';
+        const response = await registrarSubproductoFachada(this.subproducto);
+        this.successMessage = 'Subproducto registrado exitosamente';
         this.errorMessage = '';
+        console.log('Subproducto registrado:', response);
         this.resetForm();
       } catch (error) {
         if (error.response && error.response.status === 409) {
@@ -398,10 +438,10 @@ export default {
         } else if (error.response && error.response.status === 400) {
           this.errorMessage = error.response.data;
         } else {
-          this.errorMessage = 'Ha ocurrido un error al registrar el producto';
+          this.errorMessage = 'Ha ocurrido un error al registrar el subproducto';
         }
         this.successMessage = '';
-        console.error('Error al registrar producto:', error);
+        console.error('Error al registrar subproducto:', error);
       } finally {
         this.isLoading = false;
       }

@@ -119,7 +119,7 @@ const routes = [
         name: 'Lista de Productos',
         component: () =>
           import(
-            /* webpackChunkName: "ListaProveedores" */ '@/views/inventario/productos/ListaProductos.vue'
+            /* webpackChunkName: "ListaProductos */ '@/views/inventario/productos/ListaProductos.vue'
           ),
       },
 
@@ -138,6 +138,42 @@ const routes = [
         component: () =>
           import(
             /* webpackChunkName: "ActualizarProductos" */ '@/views/inventario/productos/ActualizarProductos.vue'
+          ),
+      }
+    ]
+  },
+
+
+  {
+    path: '/inventario/subproductos',
+    name: 'Subproductos',
+    component: DefaultLayout,
+    children: [
+
+      {
+        path: '',
+        name: 'Lista de Subproductos',
+        component: () =>
+          import(
+            /* webpackChunkName: "ListaSubproductos" */ '@/views/inventario/subproductos/ListaSubproductos.vue'
+          ),
+      },
+
+      {
+        path: 'agregar',
+        name: 'Registrar Subproducto',
+        component: () =>
+          import(
+            /* webpackChunkName: "RegistrarSubproductos" */ '@/views/inventario/subproductos/RegistrarSubproductos.vue'
+          ),
+      },
+
+      {
+        path: 'actualizar',
+        name: 'Actualizar Subproducto',
+        component: () =>
+          import(
+            /* webpackChunkName: "ActualizarSubproducto" */ '@/views/inventario/subproductos/ActualizarSubproducto.vue'
           ),
       }
     ]
@@ -224,7 +260,6 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   if (to.hash.includes('state=') || to.hash.includes('session_state=')) {
-    // If we detect Keycloak parameters, redirect to a clean URL
     next(to.path);
   } else {
     next();

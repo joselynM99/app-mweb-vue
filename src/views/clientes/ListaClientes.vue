@@ -27,22 +27,24 @@
             <div class="scroll-indicator">
               <span class="arrow">←</span> Desliza para ver más <span class="arrow">→</span>
             </div>
-            <CTable v-if="clientes.length > 0" hover>
+            <CTable v-if="sortedClientes.length > 0" hover>
               <CTableHead color="light">
                 <CTableRow>
                   <CTableHeaderCell scope="col" class="text-center">Acciones</CTableHeaderCell>
-                  <CTableHeaderCell scope="col">Nombres</CTableHeaderCell>
-                  <CTableHeaderCell scope="col">Apellidos</CTableHeaderCell>
-                  <CTableHeaderCell scope="col">Correo</CTableHeaderCell>
-                  <CTableHeaderCell scope="col">Teléfono</CTableHeaderCell>
-                  <CTableHeaderCell scope="col">Identificación</CTableHeaderCell>
+                  <CTableHeaderCell v-for="column in columns" :key="column.key" scope="col" @click="sortBy(column.key)" style="cursor: pointer;">
+                    {{ column.label }}
+                    <i v-if="sortKey !== column.key" class="fas fa-sort"></i>
+                    <span v-if="sortKey === column.key">
+                      <i :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
+                    </span>
+                  </CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
               <CTableBody>
-                <CTableRow v-for="cliente in clientes" :key="cliente.id">
+                <CTableRow v-for="cliente in sortedClientes" :key="cliente.id">
                   <CTableDataCell class="text-center">
                     <div class="action-buttons">
-                      <CButton color="success" size="sm" @click="actualizarCliente(cliente.identificacion)">
+                      <CButton color="warning" size="sm" @click="actualizarCliente(cliente.identificacion)">
                         <i class="fas fa-edit"></i>
                       </CButton>
                       <CButton color="danger" size="sm" @click="confirmarDesactivacion(cliente)">
@@ -59,7 +61,7 @@
               </CTableBody>
             </CTable>
           </div>
-          <CAlert v-if="!clientes.length && !error && !isLoading && !infoMessage" color="info">
+          <CAlert v-if="!sortedClientes.length && !error && !isLoading && !infoMessage" color="info">
             No se encontraron clientes para el negocio especificado.
           </CAlert>
         </CCardBody>
@@ -98,7 +100,35 @@ export default {
       isDeleting: false,
       clienteSeleccionado: null,
       visibleConfirmacion: false,
+      sortKey: '',
+      sortOrder: 'asc',
+      columns: [
+        { key: 'nombres', label: 'Nombres' },
+        { key: 'apellidos', label: 'Apellidos' },
+        { key: 'correo', label: 'Correo' },
+        { key: 'telefono', label: 'Teléfono' },
+        { key: 'identificacion', label: 'Identificación' }
+      ]
     };
+  },
+  computed: {
+    sortedClientes() {
+      const sorted = [...this.clientes];
+      if (this.sortKey) {
+        sorted.sort((a, b) => {
+          let aValue = a[this.sortKey];
+          let bValue = b[this.sortKey];
+
+          if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+          if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+
+          if (aValue < bValue) return this.sortOrder === 'asc' ? -1 : 1;
+          if (aValue > bValue) return this.sortOrder === 'asc' ? 1 : -1;
+          return 0;
+        });
+      }
+      return sorted;
+    }
   },
   methods: {
     async fetchClientes() {
@@ -177,6 +207,14 @@ export default {
     debouncedBuscarClientes: debounce(function () {
       this.buscarClientes();
     }, 300),
+    sortBy(key) {
+      if (this.sortKey === key) {
+        this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.sortKey = key;
+        this.sortOrder = 'asc';
+      }
+    }
   },
   watch: {
     searchQuery() {

@@ -37,7 +37,9 @@
     "simplebar-vue": "^2.3.5",
     "vue": "^3.4.28",
     "vue-barcode-reader": "^1.0.3",
-    "vue-router": "^4.3.3"
+    "vue-good-table": "^2.21.11",
+    "vue-router": "^4.3.3",
+    "vue3-table-lite": "^1.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
