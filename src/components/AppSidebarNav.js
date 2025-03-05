@@ -2,6 +2,8 @@ import { defineComponent, h, onMounted, ref, resolveComponent } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { CBadge, CSidebarNav, CNavItem, CNavGroup, CNavTitle } from '@coreui/vue'
 import nav from '@/_nav.js'
+import navEmpleado from '@/_navEmpleado.js'
+import navAdmin from '@/_navAdmin.js'
 import simplebar from 'simplebar-vue'
 import 'simplebar-vue/dist/simplebar.min.css'
 
@@ -50,6 +52,20 @@ const AppSidebarNav = defineComponent({
     onMounted(() => {
       firstRender.value = false
     })
+
+    const usuario = JSON.parse(sessionStorage.getItem('usuario'))
+    let navItems
+    if (usuario && usuario.rol === 'ADMINISTRADOR') {
+      if (usuario.negocioId === null) {
+        navItems = navAdmin
+      } else {
+        navItems = nav
+      }
+    } else if (usuario && usuario.rol === 'EMPLEADO') {
+      navItems = navEmpleado
+    } else {
+      navItems = nav
+    }
 
     const renderItem = (item, isChild = false) => {
       if (item.items) {
@@ -131,7 +147,7 @@ const AppSidebarNav = defineComponent({
           as: simplebar,
         },
         {
-          default: () => nav.map((item) => renderItem(item)),
+          default: () => navItems.map((item) => renderItem(item)),
         },
       )
   },

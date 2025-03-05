@@ -1,11 +1,18 @@
 <template>
+  <router-view></router-view>
   <CRow>
     <CCol :xs="12">
       <CCard class="mb-4">
         <CCardHeader>
           <strong style="margin-right:5px;">Proveedores</strong>
           <CSpinner v-if="isLoading" color="success" class="spinner-border-sm" />
-          <CInputGroup class="float-end" style="width: 300px;">
+          <CButton color="success" size="sm" @click="goToRegistrarProveedor" style="float: right;">
+            Registrar Proveedor
+          </CButton>
+          
+        </CCardHeader>
+        <CCardBody>
+          <CInputGroup  style="width: 300px; margin-bottom: 10px;">
             <CFormInput v-model="searchQuery" @input="buscarProveedores" placeholder="Buscar por nombre comercial" />
             <CInputGroupText style="padding:0px 5px">
               <button @click="buscarProveedores" :disabled="isLoading"
@@ -15,8 +22,6 @@
               </button>
             </CInputGroupText>
           </CInputGroup>
-        </CCardHeader>
-        <CCardBody>
           <CAlert v-if="error" color="danger" dismissible @close="error = null">
             {{ error }}
           </CAlert>
@@ -42,7 +47,7 @@
                 <CTableRow v-for="proveedor in proveedores" :key="proveedor.id">
                   <CTableDataCell class="text-center">
                     <div class="action-buttons">
-                      <CButton color="success" size="sm" @click="actualizarProveedor(proveedor.identificacion)">
+                      <CButton color="warning" size="sm" @click="actualizarProveedor(proveedor.identificacion)">
                         <i class="fas fa-edit"></i>
                       </CButton>
                       <CButton color="danger" size="sm" @click="confirmarDesactivacion(proveedor)">
@@ -101,6 +106,10 @@ export default {
     };
   },
   methods: {
+    goToRegistrarProveedor() {
+      this.$router.push({ name: 'Registrar Proveedor' });
+    },
+
     async fetchProveedores() {
       this.isLoading = true;
       this.error = null;

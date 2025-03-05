@@ -1,10 +1,15 @@
 <template>
+        <router-view></router-view>
+
   <CRow>
     <CCol :xs="12">
       <CCard class="mb-4">
         <CCardHeader>
           <strong style="margin-right:5px;">Productos</strong>
           <CSpinner v-if="isLoading" color="success" class="spinner-border-sm" />
+          <CButton color="success" size="sm" @click="goToRegistrarProducto" style="float: right;">
+            Registrar Producto
+          </CButton>
         </CCardHeader>
         <CCardBody>
           <CAlert v-if="error" color="danger" dismissible @close="error = null">
@@ -76,7 +81,8 @@
           </CInputGroup>
           <div class="table-responsive">
             <div class="scroll-indicator">
-              <span class="arrow"><i class="fas fa-arrow-left"></i></span> Desliza para ver más <span class="arrow"><i class="fas fa-arrow-right"></i></span>
+              <span class="arrow"><i class="fas fa-arrow-left"></i></span> Desliza para ver más <span class="arrow"><i
+                  class="fas fa-arrow-right"></i></span>
             </div>
             <CTable v-if="sortedProductos.length > 0" hover>
               <CTableHead color="light">
@@ -226,6 +232,10 @@ export default {
     }
   },
   methods: {
+
+    goToRegistrarProducto() {
+      this.$router.push({ name: 'Registrar Producto' });
+    },
     async fetchProductos() {
       this.isLoading = true;
       this.error = null;

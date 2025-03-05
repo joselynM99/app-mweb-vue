@@ -33,7 +33,7 @@
                         <CInputGroupText>
                           <i class="fas fa-user fa-fw"></i>
                         </CInputGroupText>
-                        <CFormInput id="nombreUsuario" v-model="usuario.nombreUsuario" placeholder="Nombre de usuario" autocomplete="username" required />
+                        <CFormInput id="nombreUsuario" v-model="usuario.nombreUsuario" placeholder="Nombre de usuario" autocomplete="username" :readonly="isEmpleado" required />
                         <div class="invalid-feedback">El nombre de usuario es obligatorio</div>
                       </CInputGroup>
                     </div>
@@ -44,7 +44,7 @@
                         <CInputGroupText>
                           <i class="fas fa-envelope fa-fw"></i>
                         </CInputGroupText>
-                        <CFormInput id="correo" v-model="usuario.correo" type="email" placeholder="Email" autocomplete="email" required />
+                        <CFormInput id="correo" v-model="usuario.correo" type="email" placeholder="Email" autocomplete="email" :readonly="isEmpleado" required />
                         <div class="invalid-feedback">El correo es obligatorio y debe ser válido</div>
                       </CInputGroup>
                     </div>
@@ -55,7 +55,7 @@
                         <CInputGroupText>
                           <i class="fas fa-user-tag fa-fw"></i>
                         </CInputGroupText>
-                        <CFormSelect id="rol" v-model="usuario.rol" required>
+                        <CFormSelect id="rol" v-model="usuario.rol" :disabled="isEmpleado" required>
                           <option disabled :selected="!usuario.rol" value="">Seleccione un rol</option>
                           <option v-for="rol in filteredRoles" :key="rol.id" :value="rol.nombre">{{ rol.nombre }}</option>
                         </CFormSelect>
@@ -63,7 +63,7 @@
                       </CInputGroup>
                     </div>
 
-                    <div class="mb-2">
+                    <div v-if="!isEmpleado" class="mb-2">
                       <label for="password" class="form-label">Contraseña</label>
                       <CInputGroup>
                         <CInputGroupText>
@@ -74,7 +74,7 @@
                       </CInputGroup>
                     </div>
 
-                    <div class="mb-4">
+                    <div v-if="!isEmpleado" class="mb-4">
                       <label for="passwordConfirm" class="form-label">Confirmar contraseña</label>
                       <CInputGroup>
                         <CInputGroupText>
@@ -92,7 +92,7 @@
                         <CInputGroupText>
                           <i class="fas fa-id-card fa-fw"></i>
                         </CInputGroupText>
-                        <CFormInput id="nombre" v-model="usuario.nombre" placeholder="Nombre" required />
+                        <CFormInput id="nombre" v-model="usuario.nombre" placeholder="Nombre" :readonly="isEmpleado" required />
                         <div class="invalid-feedback">El nombre es obligatorio</div>
                       </CInputGroup>
                     </div>
@@ -103,7 +103,7 @@
                         <CInputGroupText>
                           <i class="fas fa-id-card-alt fa-fw"></i>
                         </CInputGroupText>
-                        <CFormInput id="apellido" v-model="usuario.apellido" placeholder="Apellido" required />
+                        <CFormInput id="apellido" v-model="usuario.apellido" placeholder="Apellido" :readonly="isEmpleado" required />
                         <div class="invalid-feedback">El apellido es obligatorio</div>
                       </CInputGroup>
                     </div>
@@ -114,7 +114,7 @@
                         <CInputGroupText>
                           <i class="fas fa-phone-alt fa-fw"></i>
                         </CInputGroupText>
-                        <CFormInput id="telefono" v-model="usuario.telefono" type="tel" placeholder="Teléfono" required pattern="[0-9]{10}" />
+                        <CFormInput id="telefono" v-model="usuario.telefono" type="tel" placeholder="Teléfono" :readonly="isEmpleado" required pattern="[0-9]{10}" />
                         <div class="invalid-feedback">El teléfono es obligatorio y debe contener solo números</div>
                       </CInputGroup>
                     </div>
@@ -125,7 +125,7 @@
                         <CInputGroupText>
                           <i class="fas fa-id-badge fa-fw"></i>
                         </CInputGroupText>
-                        <CFormSelect id="tipoIdentificacion" v-model="usuario.tipoIdentificacion" required>
+                        <CFormSelect id="tipoIdentificacion" v-model="usuario.tipoIdentificacion" :disabled="isEmpleado" required>
                           <option disabled :selected="!usuario.tipoIdentificacion" value="">Seleccione un tipo de identificación</option>
                           <option v-for="tipo in tiposIdentificacion" :key="tipo" :value="tipo">{{ tipo }}</option>
                         </CFormSelect>
@@ -139,13 +139,13 @@
                         <CInputGroupText>
                           <i class="fas fa-id-card fa-fw"></i>
                         </CInputGroupText>
-                        <CFormInput id="identificacion" v-model="usuario.identificacion" placeholder="Identificación" required />
+                        <CFormInput id="identificacion" v-model="usuario.identificacion" placeholder="Identificación" :readonly="isEmpleado" required />
                         <div class="invalid-feedback">La identificación es obligatoria</div>
                       </CInputGroup>
                     </div>
                   </CCol>
                 </CRow>
-                <div class="d-grid" style="width:30%; margin: 5px auto;">
+                <div v-if="!isEmpleado" class="d-grid" style="width:30%; margin: 5px auto;">
                   <CButton color="success" type="submit" :disabled="isLoadingActualizar">
                     Actualizar
                     <CSpinner v-if="isLoadingActualizar" color="light" class="spinner-border-sm" />
@@ -205,7 +205,8 @@ export default {
       isLoadingBuscar: false,
       isLoadingActualizar: false,
       visibleConfirmacion: false,
-      loggedInUsername: JSON.parse(sessionStorage.getItem('usuario')).nombreUsuario
+      loggedInUsername: JSON.parse(sessionStorage.getItem('usuario')).nombreUsuario,
+      loggedInUserRole: JSON.parse(sessionStorage.getItem('usuario')).rol
     };
   },
   computed: {
@@ -214,6 +215,9 @@ export default {
     },
     isCurrentUser() {
       return this.searchUsername === this.loggedInUsername;
+    },
+    isEmpleado() {
+      return this.loggedInUserRole === 'EMPLEADO';
     }
   },
   watch: {
@@ -247,9 +251,7 @@ export default {
     async buscarUsuario() {
       this.isLoadingBuscar = true;
       try {
-
         const usuarioData = await buscarUsuarioPorNombreUsuarioNegocioFachada(this.searchUsername, JSON.parse(sessionStorage.getItem('usuario')).negocioId);
-
         this.usuario = { ...usuarioData, password: '', passwordConfirm: '' }; // Reset passwords
         this.successMessage = '';
         this.errorMessage = '';
@@ -304,8 +306,6 @@ export default {
         await this.confirmarActualizacion();
       }
     },
-
-
     async confirmarActualizacion() {
       this.isLoadingActualizar = true;
       try {

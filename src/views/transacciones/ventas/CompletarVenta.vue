@@ -2,10 +2,15 @@
     <div class="bwrapper align-items-center">
         <CContainer>
             <CRow class="justify-content-center">
-                <CCol md="6" class="mt-2 ">
+
+                <CButton color="success" @click="goBack" class="fixed-top-right">
+                    <i class="fas fa-arrow-left"></i>
+                </CButton>
+
+                <CCol md="4" class="mt-2">
                     <CCard class="mb-2 custom-card">
                         <CCardHeader>
-                            <h4 class="card-title">Cliente</h4>
+                            <h5 class="card-title">Cliente</h5>
                         </CCardHeader>
                         <CCardBody class="p-3">
                             <div class="d-flex justify-content-center mb-2">
@@ -81,16 +86,53 @@
                         </CCardBody>
                     </CCard>
                 </CCol>
-                <CCol md="6" class="mt-2 ">
+                <CCol md="4" class="mt-2">
                     <CCard class="mb-2 custom-card">
                         <CCardHeader>
-                            <h4 class="card-title">Completar Venta</h4>
+                            <h5 class="card-title">Resumen de venta</h5>
+                        </CCardHeader>
+                        <CCardBody class="p-3">
+                            <div class="invoice-summary text-start">
+                                <h6>Productos:</h6>
+                                <div class="table-responsive">
+                                    <CTable hover class="table table-striped table-bordered">
+                                        <CTableHead color="light">
+                                            <CTableRow>
+                                                <CTableHeaderCell scope="col">Producto</CTableHeaderCell>
+                                                <CTableHeaderCell scope="col">Cantidad</CTableHeaderCell>
+                                                <CTableHeaderCell scope="col">Precio</CTableHeaderCell>
+                                                <CTableHeaderCell scope="col">Subtotal</CTableHeaderCell>
+                                            </CTableRow>
+                                        </CTableHead>
+                                        <CTableBody>
+                                            <CTableRow v-for="(item, index) in carrito" :key="index">
+                                                <CTableDataCell>{{ item.nombre }}</CTableDataCell>
+                                                <CTableDataCell>{{ item.cantidad }}</CTableDataCell>
+                                                <CTableDataCell>{{ item.precioVenta }}</CTableDataCell>
+                                                <CTableDataCell>{{ (item.cantidad * item.precioVenta).toFixed(2) }}
+                                                </CTableDataCell>
+                                            </CTableRow>
+                                        </CTableBody>
+                                    </CTable>
+                                </div>
+                                <p><strong>Total Venta:</strong> {{ totalVenta }}</p>
+                                <p><strong>Monto Ingresado:</strong> {{ montoIngresado }}</p>
+                                <p><strong>Cambio:</strong> {{ cambio }}</p>
+                            </div>
+                            <CAlert v-if="successMessage" color="success">{{ successMessage }}</CAlert>
+                            <CAlert v-if="errorMessage" color="danger">{{ errorMessage }}</CAlert>
+                        </CCardBody>
+                    </CCard>
+                </CCol>
+                <CCol md="4" class="mt-2">
+                    <CCard class="mb-2 custom-card">
+                        <CCardHeader>
+                            <h5 class="card-title">Completar Venta</h5>
                         </CCardHeader>
                         <CCardBody class="p-3">
                             <CForm @submit.prevent="finalizarVenta" novalidate
                                 :class="{ 'was-validated': wasValidated }">
-                                <CAlert v-if="successMessage" color="success">{{ successMessage }}</CAlert>
-                                <CAlert v-if="errorMessage" color="danger">{{ errorMessage }}</CAlert>
+
 
                                 <div class="mb-2">
                                     <label for="total" class="form-label">Total</label>
@@ -147,9 +189,15 @@
                                             placeholder="Ingrese la cantidad recibida" />
                                     </CInputGroup>
                                 </div>
-
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" id="imprimir" v-model="imprimir">
+                                    <label class="form-check-label" for="imprimir">Imprimir</label>
+                                </div>
                                 <CButton v-if="montoIngresado === null || (cambio < 0)" type="button" color="danger"
-                                    @click="generarDeuda">Generar Deuda</CButton>
+                                    @click="generarDeuda">Generar Deuda
+                                    <CSpinner v-if="isLoadingVenta" color="light" class="spinner-border-sm" />
+
+                                </CButton>
                                 <CButton v-else type="submit" color="success" :disabled="isLoadingVenta">
                                     Finalizar Venta
                                     <CSpinner v-if="isLoadingVenta" color="light" class="spinner-border-sm" />
@@ -158,6 +206,7 @@
                         </CCardBody>
                     </CCard>
                 </CCol>
+
             </CRow>
         </CContainer>
 
@@ -214,6 +263,8 @@ import { obtenerClientePorIdentificacionFachada, buscarClientesPorNombreFachada,
 import RegistrarClientes from '@/views/clientes/RegistrarClientes.vue';
 import { buscarCuadreCajaActivoPorUsuarioFachada } from '@/assets/js/gestion-cajas';
 import { registrarVentasFachada } from '@/assets/js/ventas';
+import { obtenerNegocioPorIdFachada } from '@/assets/js/negocios';
+import { generarDeudaFachada } from '@/assets/js/deudas';
 
 export default {
     components: {
@@ -251,7 +302,9 @@ export default {
             mostrarFormularioCrearCliente: false,
             mostrarInformacionCliente: false,
             modoBusqueda: 'identificacion',
-            clientes: []
+            clientes: [],
+            imprimir: false
+
         };
     },
     computed: {
@@ -278,7 +331,7 @@ export default {
             this.obtenerCuadreCaja();
 
         } else {
-            console.error('No se encontraron datos de venta');
+            this.errorMessage = 'No se encontraron datos de venta';
         }
     },
     methods: {
@@ -299,11 +352,47 @@ export default {
             this.cambio = Number((this.montoIngresado - this.totalVenta).toFixed(2));
         },
         generarDeuda() {
-            // Implementar lógica para generar deuda
+            if (this.isLoadingVenta) return;
+
+            if (this.clienteEncontrado.identificacion === '9999999999999' || this.clienteEncontrado.identificacion == null) {
+                this.errorMessage = 'No se puede generar deuda a Consumidor Final';
+                return;
+            }
+            this.isLoadingVenta = true;
+
+            const deuda = {
+                total: this.totalVenta,
+                montoRecibido: this.montoRecibido,
+                clienteId: this.clienteEncontrado.identificacion,
+                idCuadreCaja: this.cuadreCajaId,
+                idNegocio: this.negocioId,
+                detalles: this.carrito,
+            };
+
+            console.log(deuda);
+
+            generarDeudaFachada(deuda)
+                .then(() => {
+                    this.successMessage = 'Deuda generada exitosamente';
+                    this.errorMessage = '';
+                    this.ventaFinalizada = true;
+                    this.goBack();
+
+                })
+                .catch(error => {
+                    console.error('Error al generar deuda:', error);
+                    this.errorMessage = 'Ha ocurrido un error al generar la deuda';
+                    this.successMessage = '';
+                })
+                .finally(() => {
+                    this.isLoadingVenta = false;
+                });
+
+
         },
 
         goBack() {
-            this.$router.go(-1);
+            this.$router.push({ name: 'Ventas' });
         },
         finalizarVenta() {
             if (this.isLoadingVenta) return; // Evitar múltiples envíos
@@ -328,7 +417,6 @@ export default {
                 }
             };
 
-            console.log(JSON.stringify(venta));
 
             this.isLoadingVenta = true;
             registrarVentasFachada(venta)
@@ -336,27 +424,110 @@ export default {
                     this.successMessage = 'Venta registrada exitosamente';
                     this.errorMessage = '';
                     this.ventaFinalizada = true;
-                    sessionStorage.removeItem('datosVenta');
-                    this.goBack();
 
                 })
                 .catch(error => {
+                    console.error('Error al registrar la venta:', error);
                     this.errorMessage = 'Ha ocurrido un error al registrar la venta';
                     this.successMessage = '';
-                    console.error('Error al registrar venta:', error);
                 })
                 .finally(() => {
                     this.isLoadingVenta = false;
+
+                    if (this.imprimir) {
+                        this.imprimirTicket();
+                    }
+
+                    sessionStorage.removeItem('datosVenta');
+
+                    this.goBack();
                 });
         },
+
+
+
+        async imprimirTicket() {
+            const now = new Date();
+            const { nombreComercial, ruc } = await obtenerNegocioPorIdFachada(this.negocioId);
+            let ticketContent = `
+            <div style="font-family: 'Courier New', Courier, monospace; width: 80mm;">
+                <div style="text-align: center;">
+                    <h2 style="font-size: 12px;">Comprobante de Venta</h2>
+                    <h2 style="font-size: 18px;">${nombreComercial}</h2>
+                    <p style="font-size: 12px;">RUC: ${ruc}</p>
+                    <p style="font-size: 12px;">${now.toLocaleDateString()} ${now.toLocaleTimeString()}</p>
+                </div>
+                <hr style="border: 1px dashed black;">
+                <p style="font-size: 12px;"><strong>Cliente:</strong> ${this.clienteEncontrado.nombres} ${this.clienteEncontrado.apellidos}</p>
+                <p style="font-size: 12px;"><strong>Identificación:</strong> ${this.clienteEncontrado.identificacion}</p>
+                <hr style="border: 1px dashed black;">
+                <table style="width:100%; font-size: 12px;">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left;">Cant</th>
+                            <th style="text-align: left;">Producto</th>
+                            <th style="text-align: right;">Precio</th>
+                            <th style="text-align: right;">Subt</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${this.carrito.map(item => `
+                        <tr>
+                            <td>${item.cantidad}</td>
+                            <td>${item.nombre} - ${item.codigoBarras}</td>
+                            <td style="text-align: right;">$${parseFloat(item.precioVenta).toFixed(2)}</td>
+                            <td style="text-align: right;">$${(item.cantidad * parseFloat(item.precioVenta)).toFixed(2)}</td>
+                        </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                <hr style="border: 1px dashed black;">
+                <p style="font-size: 12px;">Total: $${Number(this.totalVenta).toFixed(2)}</p>
+                <p style="font-size: 12px;">Recibido: $${this.montoRecibido}</p>
+                <p style="font-size: 12px;">Cambio: $${this.cambio}</p>
+                <p style="text-align: center; font-size: 12px;">¡Gracias por su compra!</p>
+            </div>
+            `;
+
+            // **Crear un iframe oculto y enviar a imprimir**
+            const iframe = document.createElement("iframe");
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
+
+            iframe.contentWindow.document.open();
+            iframe.contentWindow.document.write(ticketContent);
+            iframe.contentWindow.document.close();
+
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+            }, 1000);
+        },
+
+
         async cargarClientes() {
             this.isLoadingClientes = true;
             try {
                 this.clientes = await obtenerClientesActivosPorNegocioFachada(this.negocioId);
             } catch (error) {
-                this.errorMessage = 'Error al cargar clientes';
-                console.error('Error al cargar clientes:', error);
+                if (error.response && error.response.status !== 404) {
+                    this.errorMessage = 'Error al cargar clientes';
+                }
+            } finally {
                 this.isLoadingClientes = false;
+            }
+        },
+
+        async cargarClientes() {
+            this.isLoadingClientes = true;
+            try {
+                this.clientes = await obtenerClientesActivosPorNegocioFachada(this.negocioId);
+            } catch (error) {
+                if (error.response && error.response.status !== 404) {
+                    this.errorMessage = 'Error al cargar clientes';
+                }
             } finally {
                 this.isLoadingClientes = false;
             }
@@ -532,5 +703,44 @@ export default {
     .custom-card {
         height: auto !important;
     }
+}
+
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+    max-height: 300px;
+    /* Ajusta este valor según sea necesario */
+}
+
+.table {
+    width: 100%;
+    table-layout: auto;
+    border-collapse: collapse;
+}
+
+.table td {
+    word-wrap: break-word;
+    white-space: normal;
+    text-align: left;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+.table th {
+    font-size: 0.85rem;
+    text-align: left;
+}
+
+.table td {
+    font-size: 0.8rem;
+}
+
+.fixed-top-right {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    max-width: 50px;
 }
 </style>

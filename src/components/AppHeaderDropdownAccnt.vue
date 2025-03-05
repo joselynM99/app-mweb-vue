@@ -3,15 +3,16 @@ import { KeycloakService } from '@/assets/js/keycloak';
 export default {
   data() {
     return {
-      username: null
+      username: null,
+      isAdmin: false
     };
   },
   created() {
-    if (KeycloakService.isLoggedIn()) {
-      this.username = KeycloakService.getUsername();
-    }
+    this.username = JSON.parse(sessionStorage.getItem('usuario')).nombreUsuario;
+    this.isAdmin = JSON.parse(sessionStorage.getItem('usuario')).rol === 'ADMINISTRADOR';
+
   },
-  methods: {
+  methods: {  
     logout() {
       KeycloakService.logout();
     },
@@ -31,7 +32,7 @@ export default {
       </div>
     </CDropdownToggle>
     <CDropdownMenu class="pt-0">
-      <CDropdownItem @click="goToProfile">
+      <CDropdownItem v-if="!isAdmin" @click="goToProfile">
         <CIcon icon="cil-user" /> Perfil de usuario
       </CDropdownItem>
       <CDropdownItem @click="logout">
@@ -58,12 +59,10 @@ export default {
   cursor: pointer;
 }
 
-
 .dropdown-item.active,
 .dropdown-item:active {
   background-color: #42b883 !important;
   color: white;
   cursor: pointer;
 }
-
 </style>

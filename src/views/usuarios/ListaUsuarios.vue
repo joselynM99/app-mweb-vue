@@ -5,6 +5,9 @@
         <CCardHeader>
           <strong style="margin-right:5px;">Usuarios</strong>
           <CSpinner v-if="isLoading" color="success" class="spinner-border-sm" />
+          <CButton color="success" size="sm" @click="goToRegistrarUsuario" style="float: right;">
+      Registrar Usuario
+    </CButton>
         </CCardHeader>
         <CCardBody>
           <CAlert v-if="error" color="danger" dismissible @close="error = null">
@@ -127,6 +130,10 @@ export default {
     this.fetchUsuarios();
   },
   methods: {
+
+    goToRegistrarUsuario() {
+      this.$router.push({ name: 'Registrar Usuario' });
+    },
     async fetchUsuarios() {
       this.isLoading = true;
       try {

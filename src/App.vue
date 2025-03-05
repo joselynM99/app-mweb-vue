@@ -32,6 +32,7 @@ onBeforeMount(() => {
 
 <template>
   <router-view />
+  <router-view name="extra" />
   <meta charset="UTF-8">
 </template>
 

@@ -5,7 +5,14 @@
         <CCardHeader>
           <strong style="margin-right:5px;">Clientes</strong>
           <CSpinner v-if="isLoading" color="success" class="spinner-border-sm" />
-          <CInputGroup class="float-end" style="width: 300px;">
+          <CButton color="success" size="sm" @click="goToRegistrarCliente" style="float: right;">
+            Registrar Clientes
+          </CButton>
+
+        </CCardHeader>
+        <CCardBody>
+
+          <CInputGroup style="width: 300px; margin-bottom: 10px;" >
             <CFormInput v-model="searchQuery" @input="buscarClientes" placeholder="Buscar por nombre" />
             <CInputGroupText style="padding:0px 5px">
               <button @click="buscarClientes" :disabled="isLoading"
@@ -15,8 +22,6 @@
               </button>
             </CInputGroupText>
           </CInputGroup>
-        </CCardHeader>
-        <CCardBody>
           <CAlert v-if="error" color="danger" dismissible @close="error = null">
             {{ error }}
           </CAlert>
@@ -31,7 +36,8 @@
               <CTableHead color="light">
                 <CTableRow>
                   <CTableHeaderCell scope="col" class="text-center">Acciones</CTableHeaderCell>
-                  <CTableHeaderCell v-for="column in columns" :key="column.key" scope="col" @click="sortBy(column.key)" style="cursor: pointer;">
+                  <CTableHeaderCell v-for="column in columns" :key="column.key" scope="col" @click="sortBy(column.key)"
+                    style="cursor: pointer;">
                     {{ column.label }}
                     <i v-if="sortKey !== column.key" class="fas fa-sort"></i>
                     <span v-if="sortKey === column.key">
@@ -112,6 +118,8 @@ export default {
     };
   },
   computed: {
+    
+
     sortedClientes() {
       const sorted = [...this.clientes];
       if (this.sortKey) {
@@ -131,6 +139,11 @@ export default {
     }
   },
   methods: {
+
+    goToRegistrarCliente() {
+      this.$router.push({ name: 'Registrar Cliente' });
+    },
+
     async fetchClientes() {
       this.isLoading = true;
       this.error = null;

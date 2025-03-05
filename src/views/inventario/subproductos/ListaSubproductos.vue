@@ -1,10 +1,15 @@
 <template>
+      <router-view></router-view>
+
   <CRow>
     <CCol :xs="12">
       <CCard class="mb-4">
         <CCardHeader>
           <strong style="margin-right:5px;">Subproductos</strong>
           <CSpinner v-if="isLoading" color="success" class="spinner-border-sm" />
+          <CButton color="success" size="sm" @click="goToRegistrarSubproducto" style="float: right;">
+            Registrar Subproducto
+          </CButton>
         </CCardHeader>
         <CCardBody>
           <CAlert v-if="error" color="danger" dismissible @close="error = null">
@@ -41,7 +46,7 @@
                     </CCol>
                     <CCol md="3">
                       <div class="filter-item">
-                        <label>Proveedor:</label>
+                        <label>Subproducto:</label>
                         <select v-model="filtros.proveedor" @change="filtrarSubproductos" class="form-select">
                           <option value="">Todos</option>
                           <option v-for="proveedor in [...new Set(subproductos.map(p => p.proveedor))]" :key="proveedor"
@@ -226,6 +231,10 @@ export default {
     }
   },
   methods: {
+    goToRegistrarSubproducto() {
+      this.$router.push({ name: 'Registrar Subproducto' });
+    },
+
     async fetchSubproductos() {
       this.isLoading = true;
       this.error = null;
@@ -278,7 +287,7 @@ export default {
       });
     },
     actualizarSubproducto(codigoBarras) {
-      this.$router.push({ name: 'Actualizar Subproducto', query: { codigoBarras } });
+      this.$router.push({ name: 'Actualizar Subproducto', params: { codigoBarras } });
     },
     confirmarDesactivacion(subproducto) {
       this.subproductoSeleccionado = subproducto;

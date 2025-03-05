@@ -1,5 +1,5 @@
 import Keycloak from 'keycloak-js';
-import { buscarUsuarioPorNombreUsuarioFachada } from './usuarios';
+import { buscarUsuarioPorNombreUsuarioFachada, registrarUsuarioFachada } from './negocios';
 
 const keycloak = new Keycloak({
   url: process.env.VUE_APP_KEYCLOAK_URL,
@@ -12,17 +12,42 @@ export const initKeycloak = (onAuthenticatedCallback) => {
     .then((authenticated) => {
       if (authenticated) {
         const username = keycloak.tokenParsed?.preferred_username;
+        const email = keycloak.tokenParsed?.email;
+        const firstName = keycloak.tokenParsed?.given_name;
+        const lastName = keycloak.tokenParsed?.family_name;
+        const roles = keycloak.tokenParsed?.realm_access?.roles;
+
+        console.log('Autenticado:', username, email, firstName, lastName, roles);
 
         if (username) {
           (async () => {
             try {
               const usuario = await buscarUsuarioPorNombreUsuarioFachada(username);
               sessionStorage.setItem('usuario', JSON.stringify(usuario));
-              //console.log(keycloak.token);
-
+              console.log('Usuario:', usuario);
               onAuthenticatedCallback();
             } catch (error) {
-              console.error('Error al buscar el usuario:', error);
+              if (roles.includes('ADMINISTRADOR')) {
+                const nuevoUsuario = {
+                  nombreUsuario: username,
+                  correo: email,
+                  nombre: firstName,
+                  apellido: lastName,
+                  rol: 'ADMINISTRADOR',
+                  negocioId: sessionStorage.getItem('negocioId') || null,
+                  activo: true,
+                };
+
+                try {
+                  sessionStorage.setItem('usuario', JSON.stringify(nuevoUsuario));
+                  console.log('Nuevo usuario creado:', nuevoUsuario);
+                  onAuthenticatedCallback();
+                } catch (registroError) {
+                  console.error('Error al registrar el usuario:', registroError);
+                }
+              } else {
+                keycloak.logout();
+              }
             }
           })();
         }

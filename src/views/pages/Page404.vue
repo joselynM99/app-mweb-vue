@@ -1,24 +1,23 @@
 <template>
-  <div class="wrapper min-vh-100 d-flex flex-row align-items-center">
+  <div class="wrapper min-vh-100 d-flex flex-row align-items-center bg-light">
     <CContainer>
       <CRow class="justify-content-center">
         <CCol :md="6">
-          <div class="clearfix">
-            <h1 class="float-start display-3 me-4">404</h1>
-            <h4 class="pt-3">Oops! You're lost.</h4>
-            <p class="text-body-secondary float-start">
-              The page you are looking for was not found.
+          <div class="clearfix text-center">
+            <h1 class="display-3 text-danger">404</h1>
+            <p class="text-secondary">
+              La página que está buscando no ha sido encontrada.
             </p>
           </div>
-          <CInputGroup class="input-prepend">
-            <CInputGroupText>
-              <CIcon icon="cil-magnifying-glass" />
-            </CInputGroupText>
-            <CFormInput type="text" placeholder="What are you looking for?" />
-            <CButton color="info">Search</CButton>
-          </CInputGroup>
+          
         </CCol>
       </CRow>
     </CContainer>
   </div>
 </template>
+
+<style scoped>
+.wrapper {
+  background-color: #f8f9fa;
+}
+</style>

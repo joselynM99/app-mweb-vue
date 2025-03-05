@@ -7,7 +7,7 @@ const breadcrumbs = ref()
 const getBreadcrumbs = () => {
   return router.currentRoute.value.matched.map((route) => {
     return {
-      active: route.path === router.currentRoute.value.fullPath,
+      active: (route.path === router.currentRoute.value.fullPath) || (route.redirect === router.currentRoute.value.fullPath),
       name: route.name,
       path: `${router.options.history.base}${route.path}`,
     }

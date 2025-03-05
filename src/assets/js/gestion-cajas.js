@@ -43,7 +43,25 @@ export const abrirCajaFachada = async (cuadreCajaDTO) => {
   return await abrirCaja(cuadreCajaDTO);
 };
 
+export const registrarAdicionalFachada = async (adicionalesDTO) => {
+  return await registrarAdicional(adicionalesDTO);
+};
 
+export const obtenerAdicionalesActivosPorCuadreCajaFachada = async (idCuadreCaja) => {
+  return await obtenerAdicionalesActivosPorCuadreCaja(idCuadreCaja);
+};
+
+export const desactivarAdicionalFachada = async (idAdicional) => {
+  return await desactivarAdicional(idAdicional);
+};
+
+export const buscarCuadreCajaFachada = async (usuario, fechaInicio, fechaFin, estado, idNegocio) => {
+  return await buscarCuadreCaja(usuario, fechaInicio, fechaFin, estado, idNegocio);
+};
+
+export const cerrarCajaFachada = async (cuadreCajaDTO) => {
+  return await cerrarCaja(cuadreCajaDTO);
+};
 
 // Llamadas a la API
 const crearCaja = async (cajaDTO) => {
@@ -62,7 +80,6 @@ const actualizarCaja = async (cajaDTO) => {
   return apiClient.put('/caja', cajaDTO).then(r => r.data);
 };
 
-
 const buscarCuadreCajaActivoPorUsuario = async (usuario, idNegocio) => {
   return apiClient.get(`/activo-usuario`, {
     params: {
@@ -72,7 +89,34 @@ const buscarCuadreCajaActivoPorUsuario = async (usuario, idNegocio) => {
   }).then(r => r.data);
 };
 
-
 const abrirCaja = async (cuadreCajaDTO) => {
   return apiClient.post('/abrir', cuadreCajaDTO).then(r => r.data);
+};
+
+const registrarAdicional = async (adicionalesDTO) => {
+  return apiClient.post('/adicional', adicionalesDTO).then(r => r.data);
+};
+
+const obtenerAdicionalesActivosPorCuadreCaja = async (idCuadreCaja) => {
+  return apiClient.get(`/adicionales-activos/${idCuadreCaja}`).then(r => r.data);
+};
+
+const desactivarAdicional = async (idAdicional) => {
+  return apiClient.patch(`/adicional/desactivar/${idAdicional}`).then(r => r.data);
+};
+
+const buscarCuadreCaja = async (usuario, fechaInicio, fechaFin, estado, idNegocio) => {
+  return apiClient.get(`/buscar`, {
+    params: {
+      usuario,
+      fechaInicio,
+      fechaFin,
+      estado,
+      idNegocio
+    }
+  }).then(r => r.data);
+};
+
+const cerrarCaja = async (cuadreCajaDTO) => {
+  return apiClient.put('/cerrar', cuadreCajaDTO).then(r => r.data);
 };

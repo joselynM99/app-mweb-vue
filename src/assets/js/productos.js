@@ -43,6 +43,10 @@ export const desactivarProductoFachada = async (id) => {
   return await desactivarProducto(id);
 };
 
+export const listaProductosPorProveedorFachada = async (idNegocio, proveedorId) => {
+  return await listaProductosPorProveedor(idNegocio, proveedorId);
+};
+
 // Llamadas a la API
 const registrarProducto = async (productoDTO) => {
   return apiClient.post('/', productoDTO).then(r => r.data);
@@ -66,4 +70,8 @@ const listaProductosPorNombre = async (nombre, idNegocio) => {
 
 const desactivarProducto = async (id) => {
   return apiClient.patch(`/${id}`).then(r => r.data);
+};
+
+const listaProductosPorProveedor = async (idNegocio, proveedorId) => {
+  return apiClient.get(`/proveedor/${proveedorId}?idNegocio=${idNegocio}`).then(r => r.data);
 };

@@ -1,33 +1,38 @@
 <template>
   <div class="bwrapper align-items-center">
+    <div class="ventas-container">
+      <AppBreadcrumb />
+    </div>
+
     <CContainer fluid>
       <CRow>
         <CCol md="6" class="mt-2">
           <CCard class="mb-2 custom-card">
             <CCardBody>
-              <CSpinner v-if="isLoading" color="success" />
-              <CAlert v-if="error" color="danger" dismissible @close="error = null">
-                {{ error }}
-              </CAlert>
-              <CAlert v-if="infoMessage" color="info" dismissible @close="infoMessage = null">
-                {{ infoMessage }}
-              </CAlert>
-              <div class="d-flex justify-content-center mb-3">
+
+              <div class="alerts-container">
+                <CSpinner v-if="isLoading" color="success" />
+                <CAlert v-if="error" color="danger" dismissible @close="error = null">
+                  {{ error }}
+                </CAlert>
+                <CAlert v-if="infoMessage" color="info" dismissible @close="infoMessage = null">
+                  {{ infoMessage }}
+                </CAlert>
+              </div>
+              <CInputGroup class="mt-1 mb-2" style="width: 100%;">
+                <CFormInput v-model="textoBusqueda"
+                  :placeholder="modoBusqueda === 'nombre' ? 'Buscar por nombre' : 'Buscar por código'"
+                  @keyup.enter="agregarPorCodigo" />
                 <CButton
                   :class="{ 'active-button': modoBusqueda === 'codigo', 'inactive-button': modoBusqueda !== 'codigo' }"
                   @click="cambiarModoBusqueda('codigo')" :disabled="isLoading">
-                  Código <span class="d-none d-md-inline">(F1)</span>
+                  Código
                 </CButton>
                 <CButton
                   :class="{ 'active-button': modoBusqueda === 'nombre', 'inactive-button': modoBusqueda !== 'nombre' }"
                   @click="cambiarModoBusqueda('nombre')" :disabled="isLoading">
-                  Nombre <span class="d-none d-md-inline">(F2)</span>
+                  Nombre
                 </CButton>
-              </div>
-              <CInputGroup class="mt-3 mb-4" style="width: 100%;">
-                <CFormInput v-model="textoBusqueda"
-                  :placeholder="modoBusqueda === 'nombre' ? 'Buscar por nombre' : 'Buscar por código'"
-                  @keyup.enter="agregarPorCodigo" />
               </CInputGroup>
               <div class="table-responsive table-scroll">
                 <CTable hover class="table table-striped table-bordered">
@@ -60,7 +65,7 @@
           </CCard>
         </CCol>
         <CCol md="6" class="mt-2">
-          <CCard class="mb-2 custom-card">
+          <CCard class="mb-2 custom-card table2">
             <CCardBody class="d-flex flex-column">
 
               <div v-if="isMobile" class="totals-mobile">
@@ -75,7 +80,7 @@
                   </CTableRow>
                 </CTable>
               </div>
-              <h5>Productos Seleccionados</h5>
+              <h6>Productos Seleccionados</h6>
               <div class="table-responsive table-scroll2">
                 <CTable hover class="table table-striped table-bordered">
                   <CTableHead color="light">
@@ -128,10 +133,10 @@
                 <CButton color="primary" @click="completarVenta">
                   <i class="fas fa-check large-icon"></i> <span class="d-none d-md-inline">Terminar Venta</span>
                 </CButton>
-                <CButton color="warning">
+                <CButton color="warning" @click="goAdicionales">
                   <i class="fas fa-money-bill-wave large-icon"></i> <span class="d-none d-md-inline">Adicionales</span>
                 </CButton>
-                <CButton color="secondary">
+                <CButton color="secondary" @click="goCerrarCaja">
                   <i class="fas fa-cash-register large-icon"></i> <span class="d-none d-md-inline">Cerrar Caja</span>
                 </CButton>
 
@@ -152,10 +157,10 @@
     <CButton color="light" @click="completarVenta">
       <i class="fas fa-check large-icon"></i>
     </CButton>
-    <CButton color="light">
+    <CButton color="light" @click="goAdicionales">
       <i class="fas fa-money-bill-wave large-icon"></i>
     </CButton>
-    <CButton color="light">
+    <CButton color="light" @click="goCerrarCaja">
       <i class="fas fa-cash-register large-icon"></i>
     </CButton>
     <CButton color="light" @click="goBack">
@@ -172,10 +177,14 @@ import {
 import {
   listaSubproductosFachada,
 } from '@/assets/js/subproductos';
+import AppBreadcrumb from '@/components/AppBreadcrumb.vue'
 
 import { buscarCuadreCajaActivoPorUsuarioFachada } from '@/assets/js/gestion-cajas';
 
 export default {
+  components: {
+    AppBreadcrumb
+  },
   data() {
     return {
       usuario: null,
@@ -217,7 +226,7 @@ export default {
     try {
       const resultado = await buscarCuadreCajaActivoPorUsuarioFachada(this.usuario, this.idNegocio);
       if (!resultado) {
-        this.$router.push({ name: 'AbrirCaja' });
+        this.$router.push({ name: 'Abrir Caja' });
       } else {
         this.fetchItems();
       }
@@ -226,18 +235,30 @@ export default {
       this.error = 'Error al verificar cuadre de caja activo. Inténtalo de nuevo más tarde.';
     }
 
-    window.addEventListener('keydown', this.handleKeydown);
-    window.addEventListener('resize', this.handleResize);
+    this.debouncedResize = this.debounce(this.handleResize, 250);
+    window.addEventListener('resize', this.debouncedResize);
   },
   beforeDestroy() {
+    // Actualizar para remover el listener correcto
+    window.removeEventListener('resize', this.debouncedResize);
     window.removeEventListener('keydown', this.handleKeydown);
-    window.removeEventListener('resize', this.handleResize);
   },
 
 
   methods: {
-    completarVenta() {
 
+    debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    },
+    completarVenta() {
       if (this.itemsSeleccionados.length === 0) {
         this.error = 'No hay productos seleccionados para la venta.';
         return;
@@ -255,7 +276,15 @@ export default {
 
 
     goBack() {
-      this.$router.go(-1);
+      this.$router.push({ name: 'Transacciones' });
+    },
+
+    goAdicionales() {
+      this.$router.push({ name: 'Adicionales' });
+    },
+
+    goCerrarCaja() {
+      this.$router.push({ name: 'Cerrar Caja' });
     },
     cambiarModoBusqueda(mode) {
       this.modoBusqueda = mode;
@@ -265,24 +294,36 @@ export default {
       this.isLoading = true;
       this.error = null;
       this.infoMessage = null;
+
       try {
-        this.productos = await listaProductosFachada(this.idNegocio);
-        this.subproductos = await listaSubproductosFachada(this.idNegocio);
+        const productos = await listaProductosFachada(this.idNegocio);
+        this.productos = productos || [];
       } catch (err) {
-        this.error = 'Error al cargar productos y subproductos. Inténtalo de nuevo más tarde.';
-      } finally {
-        this.isLoading = false;
+        if (err.response && err.response.status === 404) {
+          this.productos = [];
+        } else {
+          this.error = 'Error al cargar productos. Inténtalo de nuevo más tarde.';
+        }
       }
-    },
-    handleKeydown(event) {
-      if (event.key === 'F1') {
-        event.preventDefault();
-        this.cambiarModoBusqueda('codigo');
-      } else if (event.key === 'F2') {
-        event.preventDefault();
-        this.cambiarModoBusqueda('nombre');
+
+      try {
+        const subproductos = await listaSubproductosFachada(this.idNegocio);
+        this.subproductos = subproductos || [];
+      } catch (err) {
+        if (err.response && err.response.status === 404) {
+          this.subproductos = [];
+        } else {
+          this.error = 'Error al cargar subproductos. Inténtalo de nuevo más tarde.';
+        }
       }
+
+      if (this.productos.length === 0 && this.subproductos.length === 0) {
+        this.infoMessage = 'No se encontraron productos o subproductos.';
+      }
+
+      this.isLoading = false;
     },
+
     handleResize() {
       const newIsMobile = window.innerWidth <= 768;
       if (this.isMobile !== newIsMobile) {
@@ -337,10 +378,43 @@ export default {
 </script>
 
 <style scoped>
+.custom-card .card-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 96vh;
+}
+
+.alerts-container {
+  flex-shrink: 0;
+}
+
+.table-scroll {
+  flex: 1;
+  min-height: 0;
+  max-height: calc(70vh - 120px);
+  overflow-y: auto;
+}
+
+.table-scroll2 {
+  flex: 1;
+  min-height: 0;
+  max-height: calc(59vh - 120px);
+  overflow-y: auto;
+}
+
+.d-flex.justify-content-center.mb-3 {
+  flex-shrink: 0;
+}
+
+.mt-3.mb-4 {
+  flex-shrink: 0;
+}
+
 .custom-card {
   background-color: transparent;
   border-color: #3b3b3b;
-  height: 96vh;
+  height: 89vh;
 }
 
 .table-responsive {
@@ -350,7 +424,7 @@ export default {
 }
 
 .table-scroll {
-  max-height: 70vh;
+  max-height: 85vh;
 
 }
 
@@ -502,10 +576,23 @@ export default {
 @media (max-width: 768px) {
   .custom-card {
     height: auto !important;
+
   }
 
-  .action-buttons {
-    display: none !important;
+  .table2 {
+    margin-bottom: 30px !important;
+  }
+
+  .custom-card .card-body {
+    max-height: calc(100vh - 60px) !important;
+  }
+
+  .table-scroll {
+    max-height: calc(50vh - 60px) !important;
+  }
+
+  .table-scroll2 {
+    max-height: calc(50vh - 60px) !important;
   }
 
   .mobile-action-menu {
@@ -516,29 +603,43 @@ export default {
     left: 0;
     width: 100%;
     background-color: #f8f9fa;
-    border-top: 1px solid transparent;
+    border-top: 1px solid #dee2e6;
     padding: 0.5rem 0;
     z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .bwrapper {
+    padding-bottom: 70px !important;
   }
 
   .mobile-action-menu .btn {
     flex: 1;
-    margin: 0 0.5rem;
-    font-size: 0.85rem;
-    border-radius: 47%;
+    margin: 0 0.25rem;
+    padding: 0.5rem;
+    border-radius: 8px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .mobile-action-menu .large-icon {
-    font-size: 1.25rem;
+  .action-buttons {
+    display: none;
   }
+}
 
-  .table-scroll {
-    max-height: 50vh !important;
-    overflow-y: auto;
-  }
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  max-width: 100%;
+}
 
-  .totals-mobile {
-    margin-bottom: 1rem;
-  }
+.ventas-container {
+  margin: 5px;
+  padding: 5px;
+  border: 1px solid #7a7a7a;
+  border-radius: 8px;
+  background-color: transparent;
 }
 </style>

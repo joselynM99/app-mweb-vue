@@ -19,7 +19,7 @@
                           <i class="fas fa-building fa-fw"></i>
                         </CInputGroupText>
                         <CFormInput id="nombreComercial" v-model="negocio.nombreComercial"
-                          placeholder="Nombre Comercial" required />
+                          placeholder="Nombre Comercial" :readonly="isEmpleado" required />
                         <div class="invalid-feedback">El nombre comercial es obligatorio</div>
                       </CInputGroup>
                     </div>
@@ -29,7 +29,7 @@
                         <CInputGroupText>
                           <i class="fas fa-map-marker-alt fa-fw"></i>
                         </CInputGroupText>
-                        <CFormInput id="direccion" v-model="negocio.direccion" placeholder="Dirección" required />
+                        <CFormInput id="direccion" v-model="negocio.direccion" placeholder="Dirección" :readonly="isEmpleado" required />
                         <div class="invalid-feedback">La dirección es obligatoria</div>
                       </CInputGroup>
                     </div>
@@ -39,7 +39,7 @@
                         <CInputGroupText>
                           <i class="fas fa-phone-alt fa-fw"></i>
                         </CInputGroupText>
-                        <CFormInput id="telefono" v-model="negocio.telefono" type="tel" placeholder="Teléfono" required
+                        <CFormInput id="telefono" v-model="negocio.telefono" type="tel" placeholder="Teléfono" :readonly="isEmpleado" required
                           pattern="[0-9]{10}" />
                         <div class="invalid-feedback">El teléfono es obligatorio y debe contener solo números</div>
                       </CInputGroup>
@@ -50,7 +50,7 @@
                         <CInputGroupText>
                           <i class="fas fa-id-card fa-fw"></i>
                         </CInputGroupText>
-                        <CFormInput id="razonSocial" v-model="negocio.razonSocial" placeholder="Razón Social"
+                        <CFormInput id="razonSocial" v-model="negocio.razonSocial" placeholder="Razón Social" :readonly="isEmpleado"
                           required />
                         <div class="invalid-feedback">La razón social es obligatoria</div>
                       </CInputGroup>
@@ -61,13 +61,13 @@
                         <CInputGroupText>
                           <i class="fas fa-id-card fa-fw"></i>
                         </CInputGroupText>
-                        <CFormInput id="ruc" v-model="negocio.ruc" placeholder="RUC" required />
+                        <CFormInput id="ruc" v-model="negocio.ruc" placeholder="RUC" :readonly="isEmpleado" required />
                         <div class="invalid-feedback">El RUC es obligatorio</div>
                       </CInputGroup>
                     </div>
                   </CCol>
                 </CRow>
-                <div class="d-grid" style="width:35%; margin: 5px auto;">
+                <div v-if="!isEmpleado" class="d-grid" style="width:35%; margin: 5px auto;">
                   <CButton color="success" type="submit" :disabled="isLoadingActualizar">
                     Actualizar
                     <CSpinner v-if="isLoadingActualizar" color="light" class="spinner-border-sm" />
@@ -109,12 +109,18 @@ export default {
       isLoadingBuscar: false,
       isLoadingActualizar: false,
       negocioId: '',
-
+      rolUsuario: ''
     };
   },
+  computed: {
+    isEmpleado() {
+      return this.rolUsuario === 'EMPLEADO';
+    }
+  },
   async mounted() {
-    this.negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId;
-
+    const usuario = JSON.parse(sessionStorage.getItem('usuario'));
+    this.negocioId = usuario.negocioId;
+    this.rolUsuario = usuario.rol;
     await this.buscarNegocio(this.negocioId);
   },
   methods: {
