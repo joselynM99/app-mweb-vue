@@ -194,5 +194,42 @@ export default [
     icon: 'fas fa-shopping-cart', // Ventas
   },
 
+  {
+    component: 'CNavTitle',
+    name: 'Cuadres de caja',
+  },
+
+  {
+    component: 'CNavItem',
+    name: 'Ver cuadres',
+    to: '/cuadres/lista',
+    icon: 'fas fa-cash-register', // Icono de caja registradora
+  },
+
+ 
+
+  {
+    component: 'CNavTitle',
+    name: 'Reportes',
+  },
+  {
+    component: 'CNavItem',
+    name: 'Ventas',
+    to: '/reportes/ventas',
+    icon: 'fas fa-shopping-cart', // Ícono carrito de compras
+  },
+  {
+    component: 'CNavItem',
+    name: 'Compras',
+    to: '/reportes/compras',
+    icon: 'fas fa-shopping-bag', // Ícono bolsa de compras
+  },
+  {
+    component: 'CNavItem',
+    name: 'Productos más vendidos',
+    to: '/reportes/productos-mas-vendidos',
+    icon: 'fas fa-chart-bar', // Ícono gráfico de barras
+  },
+
 
 ]

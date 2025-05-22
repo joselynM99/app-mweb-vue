@@ -117,9 +117,11 @@
 import { cerrarCajaFachada, obtenerAdicionalesActivosPorCuadreCajaFachada, buscarCuadreCajaActivoPorUsuarioFachada } from '@/assets/js/gestion-cajas';
 import { obtenerComprasPorCuadreCajaFachada } from '@/assets/js/compras';
 import { obtenerVentasPorCuadreCajaFachada } from '@/assets/js/ventas';
+import { obtenerAbonosPorCuadreCajaFachada } from '@/assets/js/deudas';
+
 
 export default {
-    
+
     data() {
         return {
             valorContable: 0,
@@ -135,6 +137,8 @@ export default {
             valorIngresosAdicionalesTransferencia: 0,
             valorEgresosAdicionalesEfectivo: 0,
             valorEgresosAdicionalesTransferencia: 0,
+            valorAbonosEfectivo: 0,
+            valorAbonosTransferencia: 0,
             valorApertura: 0,
             diferencia: 0,
             cuadreCajaId: null,
@@ -173,6 +177,8 @@ export default {
                 await this.obtenerVentas();
                 await this.obtenerCompras();
                 await this.obtenerAdicionales();
+                await this.obtenerAbonos();
+
                 this.calcularValorFaltante();
             } catch (error) {
                 console.error('Error al obtener datos:', error);
@@ -234,6 +240,24 @@ export default {
                 this.error = 'Error al obtener adicionales. Inténtalo de nuevo más tarde.';
             }
         },
+
+        async obtenerAbonos() {
+            try {
+                const abonos = await obtenerAbonosPorCuadreCajaFachada(this.cuadreCajaId);
+                abonos.forEach(abono => {
+                    if (abono.pagoTransferencia) {
+                        this.valorAbonosTransferencia += parseFloat(abono.monto.toFixed(2));
+                    } else {
+                        this.valorAbonosEfectivo += parseFloat(abono.monto.toFixed(2));
+                    }
+                });
+            } catch (error) {
+                console.error('Error al obtener abonos:', error);
+                this.error = 'Error al obtener abonos. Inténtalo de nuevo más tarde.';
+            }
+        },
+
+
         contarEfectivo() {
             let b100 = isNaN(parseInt(document.getElementById('100').value)) ? 0 : parseInt(document.getElementById('100').value);
             let b50 = isNaN(parseInt(document.getElementById('50').value)) ? 0 : parseInt(document.getElementById('50').value);
@@ -270,7 +294,7 @@ export default {
         },
         calcularValorFaltante() {
             let efectivoContado = this.valorContable;
-            let totalIngresosEfectivo = this.valorVentasEfectivo + this.valorIngresosAdicionalesEfectivo + this.valorApertura;
+            let totalIngresosEfectivo = this.valorVentasEfectivo + this.valorIngresosAdicionalesEfectivo + this.valorAbonosEfectivo + this.valorApertura;
             let totalEgresosEfectivo = this.valorComprasEfectivo + this.valorEgresosAdicionalesEfectivo;
             let saldoTotalEfectivo = totalIngresosEfectivo - totalEgresosEfectivo;
 
@@ -279,8 +303,8 @@ export default {
         cerrarCaja() {
             this.isLoading = true;
 
-            let totalIngresosEfectivo = Number((this.valorVentasEfectivo + this.valorIngresosAdicionalesEfectivo + this.valorApertura).toFixed(2));
-            let totalIngresosTransferencia = Number((this.valorVentasTransferencia + this.valorIngresosAdicionalesTransferencia).toFixed(2));
+            let totalIngresosEfectivo = Number((this.valorVentasEfectivo + this.valorIngresosAdicionalesEfectivo + this.valorAbonosEfectivo + this.valorApertura).toFixed(2));
+            let totalIngresosTransferencia = Number((this.valorVentasTransferencia + this.valorIngresosAdicionalesTransferencia + this.valorAbonosTransferencia).toFixed(2));
             let totalGastosEfectivo = Number((this.valorComprasEfectivo + this.valorEgresosAdicionalesEfectivo).toFixed(2));
             let totalGastosTransferencia = Number((this.valorComprasTransferencia + this.valorEgresosAdicionalesTransferencia).toFixed(2));
             let saldoFinalEfectivo = Number((totalIngresosEfectivo - totalGastosEfectivo).toFixed(2));

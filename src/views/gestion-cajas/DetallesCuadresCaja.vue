@@ -43,7 +43,8 @@
               </CTableRow>
               <CTableRow color="light">
                 <CTableDataCell class="text-end"><strong>Total Ingresos</strong></CTableDataCell>
-                <CTableDataCell colspan="2" class="text-start"><strong>{{ formatDecimal(totalIngresos) }}</strong></CTableDataCell>
+                <CTableDataCell colspan="2" class="text-start"><strong>{{ formatDecimal(totalIngresos) }}</strong>
+                </CTableDataCell>
               </CTableRow>
             </CTableBody>
           </CTable>
@@ -65,7 +66,8 @@
               </CTableRow>
               <CTableRow color="light">
                 <CTableDataCell class="text-end"><strong>Total Egresos</strong></CTableDataCell>
-                <CTableDataCell colspan="2" class="text-start"><strong>{{ formatDecimal(totalEgresos) }}</strong></CTableDataCell>
+                <CTableDataCell colspan="2" class="text-start"><strong>{{ formatDecimal(totalEgresos) }}</strong>
+                </CTableDataCell>
               </CTableRow>
             </CTableBody>
           </CTable>
@@ -85,7 +87,8 @@
               </CTableRow>
               <CTableRow>
                 <CTableDataCell>Ingresos por Transferencia</CTableDataCell>
-                <CTableDataCell class="text-start">{{ formatDecimal(cierre.totalIngresosTransferencia) }}</CTableDataCell>
+                <CTableDataCell class="text-start">{{ formatDecimal(cierre.totalIngresosTransferencia) }}
+                </CTableDataCell>
               </CTableRow>
               <CTableRow color="light">
                 <CTableDataCell class="text-end"><strong>Total Ingresos</strong></CTableDataCell>
@@ -94,7 +97,11 @@
             </CTableBody>
 
             <!-- Separador -->
-            <tbody><tr><td colspan="2" style="height: 20px; border: none; background: transparent;"></td></tr></tbody>
+            <tbody>
+              <tr>
+                <td colspan="2" style="height: 20px; border: none; background: transparent;"></td>
+              </tr>
+            </tbody>
 
             <!-- EGRESOS -->
             <CTableHead color="dark">
@@ -118,7 +125,11 @@
             </CTableBody>
 
             <!-- Separador -->
-            <tbody><tr><td colspan="2" style="height: 20px; border: none; background: transparent;"></td></tr></tbody>
+            <tbody>
+              <tr>
+                <td colspan="2" style="height: 20px; border: none; background: transparent;"></td>
+              </tr>
+            </tbody>
 
             <!-- TOTALES Y RESULTADOS -->
             <CTableHead color="dark">
@@ -141,17 +152,17 @@
               </CTableRow>
               <CTableRow>
                 <CTableDataCell>Diferencia (Contable - Saldo Efectivo)</CTableDataCell>
-                <CTableDataCell
-                  :class="[
-                    cierre.diferencia < 0 ? 'text-danger' : 'text-success',
-                    'text-start'
-                  ]">
+                <CTableDataCell :class="[
+                  cierre.diferencia < 0 ? 'text-danger' : 'text-success',
+                  'text-start'
+                ]">
                   {{ formatDecimal(cierre.diferencia) }}
                 </CTableDataCell>
               </CTableRow>
               <CTableRow color="light">
                 <CTableDataCell class="text-end"><strong>Valor de Cierre Final</strong></CTableDataCell>
-                <CTableDataCell class="text-start"><strong>{{ formatDecimal(cierre.valorCierre) }}</strong></CTableDataCell>
+                <CTableDataCell class="text-start"><strong>{{ formatDecimal(cierre.valorCierre) }}</strong>
+                </CTableDataCell>
               </CTableRow>
             </CTableBody>
           </CTable>
@@ -174,6 +185,8 @@ import {
 
 import { obtenerComprasPorCuadreCajaFachada } from '@/assets/js/compras';
 import { obtenerVentasPorCuadreCajaFachada } from '@/assets/js/ventas';
+import { obtenerAbonosPorCuadreCajaFachada } from '@/assets/js/deudas';
+
 
 export default {
   data() {
@@ -183,6 +196,7 @@ export default {
       egresos: [],
       ventas: [],
       compras: [],
+      abonos: [],
       adicionales: [],
       loading: true
     };
@@ -208,13 +222,14 @@ export default {
         const cierreData = await obtenerCierrePorIdFachada(id);
         this.cierre = cierreData || {};
 
-        const [ventas, compras, adicionales] = await Promise.all([
+        const [ventas, compras, adicionales, abonos] = await Promise.all([
           obtenerVentasPorCuadreCajaFachada(id),
           obtenerComprasPorCuadreCajaFachada(id),
-          obtenerAdicionalesActivosPorCuadreCajaFachada(id)
+          obtenerAdicionalesActivosPorCuadreCajaFachada(id),
+          obtenerAbonosPorCuadreCajaFachada(id)
         ]);
 
-        
+        this.abonos = abonos;
 
         this.ventas = ventas;
         this.compras = compras;
@@ -239,19 +254,31 @@ export default {
         });
 
       });
+
       this.compras.forEach(c => {
-         this.egresos.push({
+        this.egresos.push({
           fecha: c.fecha,
           valor: c.total,
           informacion: `COMPRA ${c.numeroReferencia || 'N/A'} - ${c.pagoTransferencia ? 'TRANSFERENCIA' : 'EFECTIVO'}`
         });
       });
+
       this.adicionales.forEach(a => {
         const targetList = a.tipo ? this.ingresos : this.egresos;
         const tipo = a.tipo ? 'INGRESO' : 'EGRESO';
         const metodo = a.pagoPorTransferencia ? 'TRANSFERENCIA' : 'EFECTIVO';
         targetList.push({ fecha: a.fecha, valor: a.valor, informacion: `${tipo} ADICIONAL - ${metodo}` });
       });
+
+      this.abonos.forEach(a => {
+        this.ingresos.push({
+          fecha: a.fecha,
+          valor: a.monto,
+          informacion: `ABONO DE DEUDA - ${a.pagoTransferencia ? 'TRANSFERENCIA' : 'EFECTIVO'}`
+        });
+      });
+
+
       this.ingresos.push({ fecha: this.cierre.fechaApertura, valor: this.cierre.valorApertura || 0, informacion: 'VALOR DE APERTURA - EFECTIVO' });
     },
     formatDate(date) {
@@ -412,7 +439,7 @@ export default {
 
       XLSX.writeFile(wb, 'reporte-cierre.xlsx');
     }
-  
+
 
   },
   mounted() {
@@ -425,9 +452,11 @@ export default {
 .text-danger {
   color: red;
 }
+
 .text-success {
   color: green;
 }
+
 .bg-primary {
   background-color: #dff0ff !important;
 }
@@ -435,11 +464,12 @@ export default {
 .text-end {
   text-align: right;
 }
+
 .text-start {
   text-align: left;
 }
+
 .text-center {
   text-align: center;
 }
-
 </style>

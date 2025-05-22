@@ -2,7 +2,7 @@
   <div class="reporte-productos-wrapper">
     <CCard>
       <CCardHeader class="d-flex justify-content-between align-items-center">
-        <strong>Productos/Subproductos Más Vendidos</strong>
+        <strong>Productos/Subproductos más vendidos</strong>
         <div>
           <CButton color="success" size="sm" class="me-2" @click="exportarExcel">Exportar Excel</CButton>
           <CButton color="danger" size="sm" @click="exportarPDF">Exportar PDF</CButton>
@@ -131,7 +131,7 @@ export default {
         th, td { border: 1px solid #000; padding: 4px; text-align: left; }
         th { background-color: #eee; }
         </style></head><body>
-        <h2>Reporte Productos/Subproductos Más Vendidos</h2>
+        <h2>Reporte Productos/Subproductos más vendidos</h2>
         <p><strong>Fecha Inicio:</strong> ${this.filtros.fechaInicio || 'N/A'}</p>
         <p><strong>Fecha Fin:</strong> ${this.filtros.fechaFin || 'N/A'}</p>
         <table>

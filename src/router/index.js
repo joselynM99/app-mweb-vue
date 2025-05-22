@@ -338,7 +338,7 @@ const routes = [
       },
       {
         path: 'productos-mas-vendidos',
-        name: 'Reporte Productos Más Vendidos',
+        name: 'Reporte productos más vendidos',
         component: () =>
           import(
           /* webpackChunkName: "ReporteProductosMasVendidos" */ '@/views/reportes/ReporteProductosMasVendidos.vue'

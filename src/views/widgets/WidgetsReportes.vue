@@ -21,7 +21,7 @@
 
     <CCol :sm="6" :xl="4" :xxl="3">
       <CWidgetStatsD class="clickable-widget" style="--cui-card-cap-bg: #4875b4" :values="[
-        { value: 'Reporte Productos Más Vendidos' }
+        { value: 'Reporte productos más vendidos' }
       ]" @click="goToProdMasVendidos">
         <template #icon>
           <i class="fas fa-shopping-bag fa-3x my-4 text-white"></i>

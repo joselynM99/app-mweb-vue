@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { KeycloakService } from './keycloak';
 
-const API_URL = `${process.env.VUE_APP_API_TRANSACCIONES}/deudas`;
+const API_URL = `${process.env.VUE_APP_API_TRANSACCIONES}/clientes/deudas`;
 
 
 const apiClient = axios.create({
@@ -42,6 +42,13 @@ const registrarAbono = async (abono) => {
   return apiClient.post('/abonos', abono).then(r => r.data);
 };
 
+const obtenerAbonosPorCuadreCaja = async (idCuadreCaja) => {
+  return apiClient.get('/abonos/por-cuadre', {
+    params: { idCuadreCaja }
+  }).then(r => r.data);
+};
+
+
 // Métodos fachada
 export const generarDeudaFachada = async (deuda) => {
   return await generarDeuda(deuda);
@@ -61,4 +68,8 @@ export const obtenerDeudaPorNumeroReferenciaFachada = async (numeroReferencia, i
 
 export const registrarAbonoFachada = async (abono) => {
   return await registrarAbono(abono);
+};
+
+export const obtenerAbonosPorCuadreCajaFachada = async (idCuadreCaja) => {
+  return await obtenerAbonosPorCuadreCaja(idCuadreCaja);
 };
