@@ -78,7 +78,7 @@
                       <label for="costoPromedio" class="form-label">Costo Promedio</label>
                       <CInputGroup>
                         <CInputGroupText><i class="fas fa-dollar-sign"></i></CInputGroupText>
-                        <CFormInput id="costoPromedio" v-model="subproducto.costoPromedio" readonly />
+                        <CFormInput id="costoPromedio" v-model="subproducto.costoPromedio" readonly disabled/>
                       </CInputGroup>
                     </div>
                   </CCol>
@@ -101,7 +101,7 @@
                       <label for="precioSinImpuestos" class="form-label">Precio Sin Impuestos</label>
                       <CInputGroup>
                         <CInputGroupText><i class="fas fa-dollar-sign"></i></CInputGroupText>
-                        <CFormInput id="precioSinImpuestos" v-model="subproducto.precioSinImpuestos" readonly />
+                        <CFormInput id="precioSinImpuestos" v-model="subproducto.precioSinImpuestos" readonly disabled/>
                       </CInputGroup>
                     </div>
 
@@ -124,7 +124,7 @@
                       <label for="precioVenta" class="form-label">Precio Venta</label>
                       <CInputGroup>
                         <CInputGroupText><i class="fas fa-money-bill-wave"></i></CInputGroupText>
-                        <CFormInput id="precioVenta" v-model="subproducto.precioVenta" readonly />
+                        <CFormInput id="precioVenta" v-model="subproducto.precioVenta" readonly disabled/>
                       </CInputGroup>
                     </div>
 
@@ -132,7 +132,7 @@
                       <label for="stockActual" class="form-label">Stock Actual</label>
                       <CInputGroup>
                         <CInputGroupText><i class="fas fa-boxes"></i></CInputGroupText>
-                        <CFormInput id="stockActual" v-model="subproducto.stockActual" readonly />
+                        <CFormInput id="stockActual" v-model="subproducto.stockActual" readonly disabled/>
                         <div class="invalid-feedback">El stock actual es obligatorio</div>
                       </CInputGroup>
                     </div>
@@ -227,7 +227,7 @@ export default {
     }
   },
   mounted() {
-    this.negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId;
+    this.negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId  || JSON.parse(sessionStorage.getItem('negocioId'));
     this.cargarListas();
   },
   methods: {

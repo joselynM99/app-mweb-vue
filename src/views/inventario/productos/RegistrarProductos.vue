@@ -216,7 +216,7 @@ export default {
     };
   },
   mounted() {
-    this.negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId;
+    this.negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId || JSON.parse(sessionStorage.getItem('negocioId'));
     this.cargarListas();
   },
   methods: {

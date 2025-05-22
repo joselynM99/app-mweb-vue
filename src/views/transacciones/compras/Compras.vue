@@ -235,7 +235,7 @@ export default {
     }
   },
   async mounted() {
-    this.idNegocio = JSON.parse(sessionStorage.getItem('usuario')).negocioId;
+    this.idNegocio = JSON.parse(sessionStorage.getItem('usuario')).negocioId || JSON.parse(sessionStorage.getItem('negocioId'));
     this.usuario = JSON.parse(sessionStorage.getItem('usuario')).nombreUsuario;
 
     try {

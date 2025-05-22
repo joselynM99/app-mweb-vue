@@ -241,7 +241,7 @@ export default {
       this.error = null;
       this.infoMessage = null;
       try {
-        const negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId;
+        const negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId || JSON.parse(sessionStorage.getItem('negocioId'));
         this.productos = await listaProductosFachada(negocioId);
 
       } catch (err) {
@@ -264,7 +264,7 @@ export default {
       this.error = null;
       this.infoMessage = null;
       try {
-        const negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId;
+        const negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId || JSON.parse(sessionStorage.getItem('negocioId'));
         this.productos = await listaProductosPorNombreFachada(this.searchQuery, negocioId);
       } catch (err) {
         if (err.response && err.response.status === 404) {

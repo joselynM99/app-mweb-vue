@@ -287,9 +287,7 @@ export default {
                 const negocios = await buscarPorNombreComercialORazonSocialFachada(this.negocio.razonSocial);
                 const negocio = negocios[0];
 
-                console.log('Negocio encontrado:', negocio);
                 this.usuario.negocioId = negocio.id;
-                console.log('Usuario a registrar:', this.usuario);
                 await registrarUsuarioFachada(this.usuario);
 
                 this.successMessage = 'Negocio y usuario registrados exitosamente';

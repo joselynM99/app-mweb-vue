@@ -233,7 +233,7 @@ export default {
   },
   mounted() {
     this.fetchRoles();
-    this.negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId;
+    this.negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId || JSON.parse(sessionStorage.getItem('negocioId'));
     const username = this.$route.query.username;
     if (username) {
       this.searchUsername = username;
@@ -251,7 +251,7 @@ export default {
     async buscarUsuario() {
       this.isLoadingBuscar = true;
       try {
-        const usuarioData = await buscarUsuarioPorNombreUsuarioNegocioFachada(this.searchUsername, JSON.parse(sessionStorage.getItem('usuario')).negocioId);
+        const usuarioData = await buscarUsuarioPorNombreUsuarioNegocioFachada(this.searchUsername, JSON.parse(sessionStorage.getItem('usuario')).negocioId || JSON.parse(sessionStorage.getItem('negocioId')));
         this.usuario = { ...usuarioData, password: '', passwordConfirm: '' }; // Reset passwords
         this.successMessage = '';
         this.errorMessage = '';

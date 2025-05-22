@@ -80,14 +80,13 @@
 </template>
 
 <script setup>
-import { useRouter, resolveComponent, h } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const usuario = JSON.parse(sessionStorage.getItem('usuario'));
-console.log(usuario);
 const isEmpleado = usuario && usuario.rol === 'EMPLEADO';
-const isAdminWithoutNegocio = usuario && usuario.rol === 'ADMINISTRADOR' && usuario.negocioId === null;
-
+const negocioId = JSON.parse(sessionStorage.getItem('negocioId'));
+const isAdminWithoutNegocio = usuario && usuario.rol === 'ADMINISTRADOR' && negocioId === null;
 const goToTransacciones = () => {
   router.push({ name: 'Transacciones' });
 };
@@ -101,7 +100,7 @@ const goToNegocio = () => {
 };
 
 const goToCuadresDeCaja = () => {
-  router.push({ name: 'CuadresDeCaja' });
+  router.push({ name: 'Cuadres de Caja' });
 };
 
 const goToReportes = () => {

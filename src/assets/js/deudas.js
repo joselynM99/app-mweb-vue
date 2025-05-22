@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { KeycloakService } from './keycloak';
 
-const API_URL = 'http://localhost:9090/clientes/deudas';
+const API_URL = `${process.env.VUE_APP_API_TRANSACCIONES}/deudas`;
+
 
 const apiClient = axios.create({
   baseURL: API_URL,

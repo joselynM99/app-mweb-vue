@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { KeycloakService } from './keycloak';
 
-const API_BASE_URL = 'http://localhost:9090/clientes';
+const API_BASE_URL = `${process.env.VUE_APP_API_TRANSACCIONES}/clientes`;
+
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,

@@ -233,7 +233,7 @@ export default {
         };
     },
     async mounted() {
-        this.idNegocio = JSON.parse(sessionStorage.getItem('usuario')).negocioId;
+        this.idNegocio = JSON.parse(sessionStorage.getItem('usuario')).negocioId || JSON.parse(sessionStorage.getItem('negocioId'));
         this.usuario = JSON.parse(sessionStorage.getItem('usuario')).nombreUsuario;
         this.obtenerDeudas();
     },
@@ -275,7 +275,6 @@ export default {
             try {
                 this.nuevoAbono.idDeuda = this.deudaSeleccionada.id;
                 this.nuevoAbono.idCuadreCaja = await this.obtenerCuadreCajaActivo();
-                console.log('nuevoAbono:', this.nuevoAbono);
                 await registrarAbonoFachada(this.nuevoAbono);
                 this.mensajeExito = 'Abono registrado exitosamente';
                 this.visibleModalAbonos = false;

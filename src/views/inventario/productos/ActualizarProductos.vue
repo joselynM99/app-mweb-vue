@@ -216,7 +216,7 @@ export default {
       isLoadingBuscar: false,
       isLoadingActualizar: false,
       isLoadingListas: true,
-      negocioId: JSON.parse(sessionStorage.getItem('usuario')).negocioId
+      negocioId: JSON.parse(sessionStorage.getItem('usuario')).negocioId || JSON.parse(sessionStorage.getItem('negocioId')),
     };
   },
   watch: {

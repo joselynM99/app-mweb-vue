@@ -1,30 +1,36 @@
+// keycloak.js
 import Keycloak from 'keycloak-js';
-import { buscarUsuarioPorNombreUsuarioFachada, registrarUsuarioFachada } from './negocios';
+import { buscarUsuarioPorNombreUsuarioFachada } from './negocios';
 
-const keycloak = new Keycloak({
+export const keycloak = new Keycloak({
   url: process.env.VUE_APP_KEYCLOAK_URL,
   realm: process.env.VUE_APP_KEYCLOAK_REALM,
   clientId: process.env.VUE_APP_KEYCLOAK_CLIENT
 });
 
 export const initKeycloak = (onAuthenticatedCallback) => {
-  keycloak.init({ onLoad: 'login-required' })
+  keycloak.init({
+    onLoad: 'login-required',
+    checkLoginIframe: false,
+    pkceMethod: 'S256'
+  })
     .then((authenticated) => {
       if (authenticated) {
+        
+
         const username = keycloak.tokenParsed?.preferred_username;
         const email = keycloak.tokenParsed?.email;
         const firstName = keycloak.tokenParsed?.given_name;
         const lastName = keycloak.tokenParsed?.family_name;
         const roles = keycloak.tokenParsed?.realm_access?.roles;
 
-        console.log('Autenticado:', username, email, firstName, lastName, roles);
-
+      
         if (username) {
           (async () => {
             try {
               const usuario = await buscarUsuarioPorNombreUsuarioFachada(username);
+            
               sessionStorage.setItem('usuario', JSON.stringify(usuario));
-              console.log('Usuario:', usuario);
               onAuthenticatedCallback();
             } catch (error) {
               if (roles.includes('ADMINISTRADOR')) {
@@ -38,13 +44,8 @@ export const initKeycloak = (onAuthenticatedCallback) => {
                   activo: true,
                 };
 
-                try {
-                  sessionStorage.setItem('usuario', JSON.stringify(nuevoUsuario));
-                  console.log('Nuevo usuario creado:', nuevoUsuario);
-                  onAuthenticatedCallback();
-                } catch (registroError) {
-                  console.error('Error al registrar el usuario:', registroError);
-                }
+                sessionStorage.setItem('usuario', JSON.stringify(nuevoUsuario));
+                onAuthenticatedCallback();
               } else {
                 keycloak.logout();
               }
@@ -52,7 +53,6 @@ export const initKeycloak = (onAuthenticatedCallback) => {
           })();
         }
       } else {
-        console.warn('No autenticado');
         keycloak.login();
       }
     })

@@ -54,9 +54,11 @@ const AppSidebarNav = defineComponent({
     })
 
     const usuario = JSON.parse(sessionStorage.getItem('usuario'))
+    const negocioId = JSON.parse(sessionStorage.getItem('negocioId'));
+
     let navItems
     if (usuario && usuario.rol === 'ADMINISTRADOR') {
-      if (usuario.negocioId === null) {
+      if (negocioId === null) {
         navItems = navAdmin
       } else {
         navItems = nav

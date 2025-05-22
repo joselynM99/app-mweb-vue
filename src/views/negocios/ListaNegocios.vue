@@ -246,6 +246,8 @@ export default {
             const usuario = JSON.parse(sessionStorage.getItem('usuario'));
             if (usuario) {
                 sessionStorage.setItem('negocioId', id);
+                usuario.negocioId = id;
+                sessionStorage.setItem('usuario', JSON.stringify(usuario));
                 window.location.href = '/';
             } else {
                 console.error('No se encontró el usuario en sessionStorage');

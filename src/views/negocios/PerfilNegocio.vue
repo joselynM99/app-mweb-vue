@@ -86,12 +86,7 @@
 import { actualizarNegocioFachada, obtenerNegocioPorIdFachada } from '@/assets/js/negocios';
 
 export default {
-  props: {
-    negocioId: {
-      type: String,
-      required: true
-    }
-  },
+ 
   data() {
     return {
       negocio: {
@@ -119,7 +114,7 @@ export default {
   },
   async mounted() {
     const usuario = JSON.parse(sessionStorage.getItem('usuario'));
-    this.negocioId = usuario.negocioId;
+    this.negocioId = usuario.negocioId || JSON.parse(sessionStorage.getItem('negocioId'));
     this.rolUsuario = usuario.rol;
     await this.buscarNegocio(this.negocioId);
   },

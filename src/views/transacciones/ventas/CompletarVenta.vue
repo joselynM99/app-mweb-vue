@@ -233,7 +233,7 @@
                                 <CTableDataCell v-if="clienteEncontrado.identificacion === '9999999999999'">Consumidor
                                     Final</CTableDataCell>
                                 <CTableDataCell v-else>{{ clienteEncontrado.nombres + ' ' + clienteEncontrado.apellidos
-                                    }}</CTableDataCell>
+                                }}</CTableDataCell>
                             </CTableRow>
                             <CTableRow>
                                 <CTableHeaderCell scope="row">Identificación</CTableHeaderCell>
@@ -326,7 +326,7 @@ export default {
             this.totalVenta = datosVenta.totalSubtotal;
             this.carrito = datosVenta.itemsSeleccionados;
             this.usuario = JSON.parse(sessionStorage.getItem('usuario')).nombreUsuario;
-            this.negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId;
+            this.negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId    || JSON.parse(sessionStorage.getItem('negocioId'));
             this.cargarClientes();
             this.obtenerCuadreCaja();
 
@@ -369,7 +369,6 @@ export default {
                 detalles: this.carrito,
             };
 
-            console.log(deuda);
 
             generarDeudaFachada(deuda)
                 .then(() => {
@@ -425,6 +424,12 @@ export default {
                     this.errorMessage = '';
                     this.ventaFinalizada = true;
 
+                    if (this.imprimir) {
+                        this.imprimirTicket();
+                    }
+
+                    sessionStorage.removeItem('datosVenta');
+                    this.goBack(); // ✅ solo se redirige si todo sale bien
                 })
                 .catch(error => {
                     console.error('Error al registrar la venta:', error);
@@ -433,15 +438,8 @@ export default {
                 })
                 .finally(() => {
                     this.isLoadingVenta = false;
-
-                    if (this.imprimir) {
-                        this.imprimirTicket();
-                    }
-
-                    sessionStorage.removeItem('datosVenta');
-
-                    this.goBack();
                 });
+
         },
 
 

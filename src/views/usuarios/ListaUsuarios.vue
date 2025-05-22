@@ -6,8 +6,8 @@
           <strong style="margin-right:5px;">Usuarios</strong>
           <CSpinner v-if="isLoading" color="success" class="spinner-border-sm" />
           <CButton color="success" size="sm" @click="goToRegistrarUsuario" style="float: right;">
-      Registrar Usuario
-    </CButton>
+            Registrar Usuario
+          </CButton>
         </CCardHeader>
         <CCardBody>
           <CAlert v-if="error" color="danger" dismissible @close="error = null">
@@ -15,19 +15,15 @@
           </CAlert>
           <div class="table-responsive">
             <div class="scroll-indicator">
-              <span class="arrow"><i class="fas fa-arrow-left"></i></span> Desliza para ver más <span class="arrow"><i class="fas fa-arrow-right"></i></span>
+              <span class="arrow"><i class="fas fa-arrow-left"></i></span> Desliza para ver más <span class="arrow"><i
+                  class="fas fa-arrow-right"></i></span>
             </div>
             <CTable v-if="usuarios.length > 0" hover>
               <CTableHead color="light">
                 <CTableRow>
                   <CTableHeaderCell scope="col" class="text-center">Acciones</CTableHeaderCell>
-                  <CTableHeaderCell
-                    v-for="column in columns"
-                    :key="column.key"
-                    scope="col"
-                    @click="sortBy(column.key)"
-                    style="cursor: pointer;"
-                  >
+                  <CTableHeaderCell v-for="column in columns" :key="column.key" scope="col" @click="sortBy(column.key)"
+                    style="cursor: pointer;">
                     {{ column.label }}
                     <i v-if="sortKey !== column.key" class="fas fa-sort"></i>
                     <span v-if="sortKey === column.key">
@@ -138,7 +134,7 @@ export default {
       this.isLoading = true;
       try {
         const us = JSON.parse(sessionStorage.getItem('usuario'));
-        const negocioId = us ? us.negocioId : null;
+        const negocioId = us?.negocioId || JSON.parse(sessionStorage.getItem('negocioId'));
         if (negocioId) {
           const response = await listarUsuariosPorNegocioFachada(negocioId);
           this.usuarios = response.filter(usuario => usuario.nombreUsuario !== us.nombreUsuario);
@@ -159,8 +155,8 @@ export default {
       this.isDeleting = true;
       try {
 
-        
-        await eliminarUsuarioFachada(this.usuarioSeleccionado.keycloakId, JSON.parse(sessionStorage.getItem('usuario')).negocioId);
+
+        await eliminarUsuarioFachada(this.usuarioSeleccionado.keycloakId, JSON.parse(sessionStorage.getItem('usuario')).negocioId || JSON.parse(sessionStorage.getItem('negocioId')));
 
         this.usuarios = this.usuarios.filter(usuario => usuario.id !== this.usuarioSeleccionado.id);
         this.visibleConfirmacion = false;

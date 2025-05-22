@@ -69,13 +69,14 @@
                     <CInputGroup>
                       <CInputGroupText><i class="fas fa-box"></i></CInputGroupText>
                       <CFormSelect id="producto" v-model="subproducto.producto" @change="obtenerCostoPromedioProducto"
-                        required>
+                        required :disabled="modoEdicion">
                         <option value="" disabled selected>Seleccione un producto</option>
                         <option v-for="producto in productos" :key="producto.codigoBarras"
                           :value="producto.codigoBarras">
                           {{ producto.nombre }} - {{ producto.costoPromedio }}
                         </option>
                       </CFormSelect>
+
                       <div class="invalid-feedback">El producto es obligatorio</div>
                     </CInputGroup>
                   </div>
@@ -86,6 +87,8 @@
                       <CInputGroupText><i class="fas fa-sort-numeric-up"></i></CInputGroupText>
                       <CFormInput type="number" id="cantidadRelacionada" v-model="subproducto.cantidadRelacionada"
                         @input="handleCantidadInput" required />
+
+
                       <div class="invalid-feedback">La cantidad relacionada es obligatoria</div>
                     </CInputGroup>
                   </div>
@@ -94,7 +97,8 @@
                     <label for="costoPromedio" class="form-label">Costo Promedio</label>
                     <CInputGroup>
                       <CInputGroupText><i class="fas fa-dollar-sign"></i></CInputGroupText>
-                      <CFormInput type="number" id="costoPromedio" v-model="subproducto.costoPromedio" readonly />
+                      <CFormInput type="number" id="costoPromedio" v-model="subproducto.costoPromedio" readonly
+                        disabled />
                     </CInputGroup>
                   </div>
                 </CCol>
@@ -103,7 +107,11 @@
                     <label for="utilidad" class="form-label">Utilidad</label>
                     <CInputGroup>
                       <CInputGroupText><i class="fas fa-percentage"></i></CInputGroupText>
-                      <CFormInput id="utilidad" v-model="subproducto.utilidad" @input="validateAndCalculate" required />
+                      <CFormInput id="utilidad" type="text" inputmode="decimal" step="0.01"
+                        pattern="[0-9]+([\\.,][0-9]*)?" v-model="subproducto.utilidad" @input="validateAndCalculate"
+                        required />
+
+
                       <CFormSelect v-model="tipoUtilidad" @change="validateAndCalculate">
                         <option value="porcentaje">Porcentaje</option>
                         <option value="valor">Valor</option>
@@ -117,7 +125,7 @@
                     <CInputGroup>
                       <CInputGroupText><i class="fas fa-dollar-sign"></i></CInputGroupText>
                       <CFormInput type="number" id="precioSinImpuestos" v-model="subproducto.precioSinImpuestos"
-                        readonly />
+                        readonly disabled />
                     </CInputGroup>
                   </div>
 
@@ -139,7 +147,7 @@
                     <label for="precioVenta" class="form-label">Precio Venta</label>
                     <CInputGroup>
                       <CInputGroupText><i class="fas fa-money-bill-wave"></i></CInputGroupText>
-                      <CFormInput type="number" id="precioVenta" v-model="subproducto.precioVenta" readonly />
+                      <CFormInput type="number" id="precioVenta" v-model="subproducto.precioVenta" readonly disabled />
                     </CInputGroup>
                   </div>
 
@@ -147,7 +155,8 @@
                     <label for="stockActual" class="form-label">Stock Actual</label>
                     <CInputGroup>
                       <CInputGroupText><i class="fas fa-boxes"></i></CInputGroupText>
-                      <CFormInput type="number" id="stockActual" v-model="subproducto.stockActual" required />
+                      <CFormInput type="number" id="stockActual" v-model="subproducto.stockActual" required readonly
+                        disabled />
                       <div class="invalid-feedback">El stock actual es obligatorio</div>
                     </CInputGroup>
                   </div>
@@ -185,7 +194,6 @@
   </div>
 </template>
 <script>
-import { debounce } from 'lodash';
 import { listaProductosFachada, obtenerProductoCodigoBarrasFachada } from '@/assets/js/productos';
 import { listaCategoriasFachada } from '@/assets/js/categorias';
 import { listaImpuestosFachada } from '@/assets/js/impuestos';
@@ -196,6 +204,7 @@ export default {
 
   data() {
     return {
+      modoEdicion: false,
       searchCodigoBarras: '',
       isLoadingBuscar: false,
       negocioId: null,
@@ -248,10 +257,16 @@ export default {
       if (newValue > 0) {
         this.calcularStockSubproducto();
       }
+    },
+    tipoUtilidad() {
+      this.validateAndCalculate();
+    },
+    'subproducto.impuesto'() {
+      this.validateAndCalculate(); // <-- Esto recalcula el impuesto y precioVenta
     }
   },
   mounted() {
-    this.negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId;
+    this.negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId || JSON.parse(sessionStorage.getItem('negocioId'));
 
     const codigoBarras = this.$route.query.codigoBarras;
     if (codigoBarras) {
@@ -270,6 +285,7 @@ export default {
         const subproductoData = await obtenerSubproductoCodigoBarrasFachada(this.searchCodigoBarras, this.negocioId);
         if (subproductoData) {
           this.subproducto = { ...subproductoData };
+          this.modoEdicion = true;
           this.productoSeleccionado = await obtenerProductoCodigoBarrasFachada(this.subproducto.producto, this.negocioId);
           this.calcularCostoPromedioSubproducto();
           this.calcularStockSubproducto();
@@ -395,13 +411,27 @@ export default {
     },
 
     handleCantidadInput() {
-      if (!this.productoSeleccionado) {
-        this.subproducto.cantidadRelacionada = 0;
-        return;
-      }
-      this.calcularCostoPromedioSubproducto();
-      this.calcularStockSubproducto();
+      this.$nextTick(() => {
+        const cantidad = parseFloat(this.subproducto.cantidadRelacionada);
+
+        if (!this.productoSeleccionado || !Number.isFinite(cantidad) || cantidad <= 0) {
+          this.subproducto.costoPromedio = 0;
+          this.subproducto.precioVenta = 0;
+          this.subproducto.precioSinImpuestos = 0;
+          return;
+        }
+
+        this.calcularCostoPromedioSubproducto();
+        this.calcularStockSubproducto();
+
+        // Resetear precios según nuevo costo
+        this.subproducto.precioVenta = this.subproducto.costoPromedio;
+        this.subproducto.precioSinImpuestos = this.subproducto.costoPromedio;
+      });
     },
+
+
+
 
     calcularStockSubproducto() {
       if (!this.productoSeleccionado) {
@@ -419,23 +449,21 @@ export default {
     },
 
     calcularCostoPromedioSubproducto() {
-      if (!this.productoSeleccionado) {
-        this.subproducto.costoPromedio = 0;
-        return;
-      }
-
-      const cantidadRelacionada = parseFloat(this.subproducto.cantidadRelacionada) || 0;
+      const cantidad = parseFloat(this.subproducto.cantidadRelacionada);
       const costoPromedioProducto = parseFloat(this.productoSeleccionado?.costoPromedio) || 0;
 
-      if (cantidadRelacionada > 0) {
-        this.subproducto.costoPromedio = (costoPromedioProducto / cantidadRelacionada).toFixed(2);
+      if (Number.isFinite(cantidad) && cantidad > 0) {
+        const costo = costoPromedioProducto / cantidad;
+        this.subproducto.costoPromedio = costo.toFixed(2);
       } else {
         this.subproducto.costoPromedio = 0;
       }
+
       this.calcularPrecios();
     },
 
     calcularPrecios() {
+      if (this.modoEdicion) return;
       const costoPromedio = parseFloat(this.subproducto.costoPromedio) || 0;
       const impuesto = this.impuestos.find(i => i.id === Number(this.subproducto.impuesto));
       const valorImpuesto = impuesto ? impuesto.valor / 100 : 0;
@@ -451,11 +479,19 @@ export default {
       this.subproducto.precioVenta = (this.subproducto.precioSinImpuestos * (1 + valorImpuesto)).toFixed(2);
     },
 
-    validateAndCalculate: debounce(function (event) {
-      const value = event.target.value.replace(',', '.');
-      event.target.value = value;
-      this.calcularPrecios();
-    }, 300),
+    validateAndCalculate() {
+      this.$nextTick(() => {
+        const raw = this.subproducto.utilidad?.toString().replace(',', '.');
+        const parsed = parseFloat(raw);
+
+        if (!isNaN(parsed)) {
+          this.subproducto.utilidad = parsed;
+          this.calcularPreciosDesdeUtilidad();
+        }
+      });
+    },
+
+
 
     resetForm() {
       this.subproducto = {
@@ -476,6 +512,25 @@ export default {
       };
       this.wasValidated = false;
     },
+
+    calcularPreciosDesdeUtilidad() {
+      const costo = parseFloat(this.subproducto.costoPromedio) || 0;
+      const utilidad = parseFloat(this.subproducto.utilidad) || 0;
+      const impuesto = this.impuestos.find(i => i.id === Number(this.subproducto.impuesto));
+      const porcentajeImpuesto = impuesto ? impuesto.valor / 100 : 0;
+
+      let precioBase;
+
+      if (this.tipoUtilidad === 'porcentaje') {
+        precioBase = costo * (1 + utilidad / 100);
+      } else {
+        precioBase = costo + utilidad;
+      }
+
+      this.subproducto.precioSinImpuestos = precioBase.toFixed(2);
+      this.subproducto.precioVenta = (precioBase * (1 + porcentajeImpuesto)).toFixed(2);
+    },
+
 
 
     async registrarSubproducto() {

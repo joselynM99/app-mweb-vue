@@ -12,7 +12,7 @@
         </CCardHeader>
         <CCardBody>
 
-          <CInputGroup style="width: 300px; margin-bottom: 10px;" >
+          <CInputGroup style="width: 300px; margin-bottom: 10px;">
             <CFormInput v-model="searchQuery" @input="buscarClientes" placeholder="Buscar por nombre" />
             <CInputGroupText style="padding:0px 5px">
               <button @click="buscarClientes" :disabled="isLoading"
@@ -118,7 +118,7 @@ export default {
     };
   },
   computed: {
-    
+
 
     sortedClientes() {
       const sorted = [...this.clientes];
@@ -150,7 +150,7 @@ export default {
       this.infoMessage = null;
       try {
         const us = JSON.parse(sessionStorage.getItem('usuario')); // Parsear la cadena JSON a un objeto
-        const negocioId = us ? us.negocioId : null;
+        const negocioId = us?.negocioId || JSON.parse(sessionStorage.getItem('negocioId'));
         if (negocioId) {
           const response = await obtenerClientesActivosPorNegocioFachada(negocioId);
           this.clientes = response;
@@ -178,7 +178,7 @@ export default {
       this.infoMessage = null;
       try {
         const us = JSON.parse(sessionStorage.getItem('usuario'));
-        const negocioId = us ? us.negocioId : null;
+        const negocioId = us?.negocioId || JSON.parse(sessionStorage.getItem('negocioId'));
         if (negocioId) {
           const response = await buscarClientesPorNombreFachada(this.searchQuery, negocioId);
           this.clientes = response;

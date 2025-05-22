@@ -5,7 +5,9 @@ import { useSidebarStore } from '@/stores/sidebar.js'
 const sidebar = useSidebarStore()
 
 const usuario = JSON.parse(sessionStorage.getItem('usuario'))
-const isAdminWithNegocioId = usuario && usuario.rol === 'ADMINISTRADOR' && usuario.negocioId
+const negocioId = JSON.parse(sessionStorage.getItem('negocioId'));
+
+const isAdminWithNegocioId = usuario && usuario.rol === 'ADMINISTRADOR' && negocioId
 
 const volverAlAdministrador = () => {
   sessionStorage.removeItem('negocioId')

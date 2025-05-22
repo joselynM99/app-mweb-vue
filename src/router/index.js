@@ -73,6 +73,8 @@ const routes = [
           ),
         meta: { roles: ['ADMINISTRADOR', 'PROPIETARIO', 'EMPLEADO'] }
       },
+
+
       {
         path: '/usuarios',
         name: 'Usuarios',
@@ -302,6 +304,52 @@ const routes = [
     ],
   },
   {
+    path: '/reportes',
+    name: 'Reportes',
+    redirect: '/reportes/menu',
+    component: DefaultLayout,
+    children: [
+      {
+        path: 'menu',
+        name: '',
+        component: () =>
+          import(
+            /* webpackChunkName: "ReportesMenu" */ '@/views/inicio/ReportesMenu.vue'
+          ),
+        meta: { roles: ['ADMINISTRADOR', 'PROPIETARIO'] }
+      },
+      {
+        path: 'ventas',
+        name: 'Reporte Ventas',
+        component: () =>
+          import(
+          /* webpackChunkName: "ReporteVentas" */ '@/views/reportes/ReporteVentas.vue'
+          ),
+        meta: { roles: ['ADMINISTRADOR', 'PROPIETARIO'] }
+      },
+      {
+        path: 'compras',
+        name: 'Reporte Compras',
+        component: () =>
+          import(
+          /* webpackChunkName: "ReporteCompras" */ '@/views/reportes/ReporteCompras.vue'
+          ),
+        meta: { roles: ['ADMINISTRADOR', 'PROPIETARIO'] }
+      },
+      {
+        path: 'productos-mas-vendidos',
+        name: 'Reporte Productos Más Vendidos',
+        component: () =>
+          import(
+          /* webpackChunkName: "ReporteProductosMasVendidos" */ '@/views/reportes/ReporteProductosMasVendidos.vue'
+          ),
+        meta: { roles: ['ADMINISTRADOR', 'PROPIETARIO'] }
+
+      }
+    ]
+  },
+
+  {
     path: '/transacciones',
     name: 'Transacciones',
     redirect: '/transacciones/menu',
@@ -415,6 +463,35 @@ const routes = [
     ],
   },
 
+  {
+    path: '/cuadres-caja',
+    name: 'Cuadres de Caja',
+    redirect: '/cuadres-caja/lista',
+    component: DefaultLayout,
+    children: [
+      {
+        path: 'lista',
+        name: '',
+        component: () =>
+          import(
+            /* webpackChunkName: "CierresCajas" */ '@/views/gestion-cajas/CierresCajas.vue'
+          ),
+        meta: { roles: ['ADMINISTRADOR', 'PROPIETARIO'] }
+      },
+
+      {
+        path: 'detalles-cuadre-caja',
+        name: 'Detalles Cuadre Caja',
+        component: () =>
+          import(
+            /* webpackChunkName: "DetalleCuadreCaja" */ '@/views/gestion-cajas/DetallesCuadresCaja.vue'
+          ),
+        meta: { roles: ['ADMINISTRADOR', 'PROPIETARIO'] }
+      },
+
+    ],
+  },
+
 
 ]
 
@@ -432,6 +509,8 @@ router.beforeEach((to, from, next) => {
     next(to.path)
   } else {
     const usuario = JSON.parse(sessionStorage.getItem('usuario'))
+
+
     if (usuario && usuario.rol && to.meta.roles && to.meta.roles.includes(usuario.rol)) {
       next()
     } else if (to.name !== 'Pagina403') {

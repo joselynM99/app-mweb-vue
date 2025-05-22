@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { KeycloakService } from './keycloak';
 
-const API_BASE_URL = 'http://localhost:9091/gestion-cajas';
+const API_BASE_URL = `${process.env.VUE_APP_API_GESTION_CAJAS}/gestion-cajas`;
+
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -63,6 +64,11 @@ export const cerrarCajaFachada = async (cuadreCajaDTO) => {
   return await cerrarCaja(cuadreCajaDTO);
 };
 
+export const obtenerCierrePorIdFachada = async (id) => {
+  return await obtenerCierrePorId(id);
+};
+
+
 // Llamadas a la API
 const crearCaja = async (cajaDTO) => {
   return apiClient.post('/caja', cajaDTO).then(r => r.data);
@@ -119,4 +125,10 @@ const buscarCuadreCaja = async (usuario, fechaInicio, fechaFin, estado, idNegoci
 
 const cerrarCaja = async (cuadreCajaDTO) => {
   return apiClient.put('/cerrar', cuadreCajaDTO).then(r => r.data);
+};
+
+const obtenerCierrePorId = async (id) => {
+  return apiClient.get(`/detalle`, {
+    params: { id }
+  }).then(r => r.data);
 };

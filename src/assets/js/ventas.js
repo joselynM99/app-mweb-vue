@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { KeycloakService } from './keycloak';
 
-const API_BASE_URL = 'http://localhost:9090/ventas';
+const API_BASE_URL = `${process.env.VUE_APP_API_TRANSACCIONES}/ventas`;
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -61,3 +61,21 @@ const buscarVentas = async (numeroReferencia, fechaInicio, fechaFin, username, i
 export const buscarVentasFachada = async (numeroReferencia, fechaInicio, fechaFin, username, idNegocio) => {
   return await buscarVentas(numeroReferencia, fechaInicio, fechaFin, username, idNegocio);
 };
+
+
+
+const obtenerProductosMasVendidos = async (fechaInicio, fechaFin, idNegocio, limite) => {
+  return apiClient.get('/mas-vendidos', {
+    params: {
+      fechaInicio,
+      fechaFin,
+      idNegocio,
+      limite
+    }
+  }).then(r => r.data);
+};
+
+export const obtenerProductosMasVendidosFachada = async (fechaInicio, fechaFin, idNegocio, limite = 10) => {
+  return await obtenerProductosMasVendidos(fechaInicio, fechaFin, idNegocio, limite);
+};
+

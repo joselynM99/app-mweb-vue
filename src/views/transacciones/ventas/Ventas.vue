@@ -220,8 +220,13 @@ export default {
     }
   },
   async mounted() {
-    this.idNegocio = JSON.parse(sessionStorage.getItem('usuario')).negocioId;
+    this.idNegocio = JSON.parse(sessionStorage.getItem('usuario')).negocioId || JSON.parse(sessionStorage.getItem('negocioId'));
     this.usuario = JSON.parse(sessionStorage.getItem('usuario')).nombreUsuario;
+
+    // Si es móvil, captura globalmente el error para evitar que se muestre
+    if (this.isMobile) {
+      window.addEventListener('error', this.handleGlobalErrors);
+    }
 
     try {
       const resultado = await buscarCuadreCajaActivoPorUsuarioFachada(this.usuario, this.idNegocio);
@@ -238,15 +243,24 @@ export default {
     this.debouncedResize = this.debounce(this.handleResize, 250);
     window.addEventListener('resize', this.debouncedResize);
   },
+
   beforeDestroy() {
-    // Actualizar para remover el listener correcto
     window.removeEventListener('resize', this.debouncedResize);
+    if (this.isMobile) {
+      window.removeEventListener('error', this.handleGlobalErrors);
+    }
     window.removeEventListener('keydown', this.handleKeydown);
   },
 
 
   methods: {
 
+    handleGlobalErrors(e) {
+      if (e.message && e.message.includes("ResizeObserver loop completed with undelivered notifications")) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+      }
+    },
     debounce(func, wait) {
       let timeout;
       return function executedFunction(...args) {

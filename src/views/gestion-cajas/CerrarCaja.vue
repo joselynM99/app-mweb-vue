@@ -117,12 +117,9 @@
 import { cerrarCajaFachada, obtenerAdicionalesActivosPorCuadreCajaFachada, buscarCuadreCajaActivoPorUsuarioFachada } from '@/assets/js/gestion-cajas';
 import { obtenerComprasPorCuadreCajaFachada } from '@/assets/js/compras';
 import { obtenerVentasPorCuadreCajaFachada } from '@/assets/js/ventas';
-import AppBreadcrumb from '@/components/AppBreadcrumb.vue';
 
 export default {
-    components: {
-        AppBreadcrumb
-    },
+    
     data() {
         return {
             valorContable: 0,
@@ -151,7 +148,7 @@ export default {
     async mounted() {
         this.isLoading = true;
         try {
-            this.idNegocio = JSON.parse(sessionStorage.getItem('usuario')).negocioId;
+            this.idNegocio = JSON.parse(sessionStorage.getItem('usuario')).negocioId || JSON.parse(sessionStorage.getItem('negocioId'));
             this.usuario = JSON.parse(sessionStorage.getItem('usuario')).nombreUsuario;
 
             const { id, valorApertura } = await buscarCuadreCajaActivoPorUsuarioFachada(this.usuario, this.idNegocio);
@@ -307,7 +304,6 @@ export default {
                 cajaId: this.cajaId
             };
 
-            console.log('Cierre de caja:', cierre);
 
             cerrarCajaFachada(cierre)
                 .then(() => {

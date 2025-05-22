@@ -1,5 +1,5 @@
 <template>
-      <router-view></router-view>
+  <router-view></router-view>
 
   <CRow>
     <CCol :xs="12">
@@ -81,7 +81,8 @@
           </CInputGroup>
           <div class="table-responsive">
             <div class="scroll-indicator">
-              <span class="arrow"><i class="fas fa-arrow-left"></i></span> Desliza para ver más <span class="arrow"><i class="fas fa-arrow-right"></i></span>
+              <span class="arrow"><i class="fas fa-arrow-left"></i></span> Desliza para ver más <span class="arrow"><i
+                  class="fas fa-arrow-right"></i></span>
             </div>
             <CTable v-if="sortedSubproductos.length > 0" hover>
               <CTableHead color="light">
@@ -240,9 +241,9 @@ export default {
       this.error = null;
       this.infoMessage = null;
       try {
-        const negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId;
+        const negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId || JSON.parse(sessionStorage.getItem('negocioId'));
         this.subproductos = await listaSubproductosFachada(negocioId);
-       
+
 
       } catch (err) {
         if (err.response && err.response.status === 404) {
@@ -264,7 +265,7 @@ export default {
       this.error = null;
       this.infoMessage = null;
       try {
-        const negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId;
+        const negocioId = JSON.parse(sessionStorage.getItem('usuario')).negocioId || JSON.parse(sessionStorage.getItem('negocioId'));
         this.subproductos = await listaSubproductosPorNombreFachada(this.searchQuery, negocioId);
       } catch (err) {
         if (err.response && err.response.status === 404) {
@@ -287,8 +288,9 @@ export default {
       });
     },
     actualizarSubproducto(codigoBarras) {
-      this.$router.push({ name: 'Actualizar Subproducto', params: { codigoBarras } });
+      this.$router.push({ name: 'Actualizar Subproducto', query: { codigoBarras } });
     },
+
     confirmarDesactivacion(subproducto) {
       this.subproductoSeleccionado = subproducto;
       this.visibleConfirmacion = true;

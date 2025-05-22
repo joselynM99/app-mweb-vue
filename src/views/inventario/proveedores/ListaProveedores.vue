@@ -116,7 +116,7 @@ export default {
       this.infoMessage = null;
       try {
         const us = JSON.parse(sessionStorage.getItem('usuario')); // Parsear la cadena JSON a un objeto
-        const negocioId = us ? us.negocioId : null;
+        const negocioId = us?.negocioId || JSON.parse(sessionStorage.getItem('negocioId'));
         if (negocioId) {
           const response = await listaProveedoresFachada(negocioId);
           this.proveedores = response;
@@ -144,7 +144,7 @@ export default {
       this.infoMessage = null;
       try {
         const us = JSON.parse(sessionStorage.getItem('usuario'));
-        const negocioId = us ? us.negocioId : null;
+        const negocioId = us?.negocioId || JSON.parse(sessionStorage.getItem('negocioId'));
         if (negocioId) {
           const response = await listaProveedoresPorNombreComercialFachada(this.searchQuery, negocioId);
           this.proveedores = response;
