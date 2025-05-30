@@ -1,6 +1,7 @@
 <template>
   <CRow :xs="{ gutter: 4 }">
-    <CCol :sm="6" :xl="4" :xxl="3">
+    <!-- Tarjeta Perfil visible solo si no es EMPLEADO -->
+    <CCol v-if="!isEmpleado" :sm="6" :xl="4" :xxl="3">
       <CWidgetStatsD class="clickable-widget" style="--cui-card-cap-bg: #42b883" :values="[
         { value: 'Perfil' }
       ]" @click="goToPerfil">
@@ -9,7 +10,9 @@
         </template>
       </CWidgetStatsD>
     </CCol>
-    <CCol :sm="6" :xl="4" :xxl="3">
+
+    <!-- Tarjeta Usuarios visible solo si no es EMPLEADO -->
+    <CCol v-if="!isEmpleado" :sm="6" :xl="4" :xxl="3">
       <CWidgetStatsD class="clickable-widget" style="--cui-card-cap-bg: #00aced" :values="[
         { value: 'Usuarios' }
       ]" @click="goToUsuarios">
@@ -18,7 +21,9 @@
         </template>
       </CWidgetStatsD>
     </CCol>
-    <CCol :sm="6" :xl="4" :xxl="3">
+
+    <!-- Tarjeta Cajas visible solo si no es EMPLEADO -->
+    <CCol v-if="!isEmpleado" :sm="6" :xl="4" :xxl="3">
       <CWidgetStatsD class="clickable-widget" style="--cui-card-cap-bg: #4875b4" :values="[
         { value: 'Cajas' }
       ]" @click="goToCajas">
@@ -27,9 +32,11 @@
         </template>
       </CWidgetStatsD>
     </CCol>
+
+    <!-- Tarjeta Clientes siempre visible -->
     <CCol :sm="6" :xl="4" :xxl="3">
       <CWidgetStatsD class="clickable-widget" color="warning" :values="[
-        { value: 'Clientes' },
+        { value: 'Clientes' }
       ]" @click="goToClientes">
         <template #icon>
           <i class="fas fa-user-friends fa-3x my-4 text-white"></i>
@@ -43,6 +50,10 @@
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+
+// Obtener usuario desde sessionStorage
+const usuario = JSON.parse(sessionStorage.getItem('usuario'));
+const isEmpleado = usuario && usuario.rol === 'EMPLEADO';
 
 const goToPerfil = () => {
   router.push({ name: 'Perfil de Negocio' });

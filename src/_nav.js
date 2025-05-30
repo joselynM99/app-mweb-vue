@@ -202,7 +202,7 @@ export default [
   {
     component: 'CNavItem',
     name: 'Ver cuadres',
-    to: '/cuadres/lista',
+    to: '/cuadres-caja/lista',
     icon: 'fas fa-cash-register', // Icono de caja registradora
   },
 

@@ -44,7 +44,7 @@ const routes = [
           import(
             /* webpackChunkName: "PerfilNegocio" */ '@/views/negocios/PerfilNegocio.vue'
           ),
-        meta: { roles: ['ADMINISTRADOR', 'PROPIETARIO', 'EMPLEADO'] }
+        meta: { roles: ['ADMINISTRADOR', 'PROPIETARIO'] }
       },
       {
         path: 'cajas',

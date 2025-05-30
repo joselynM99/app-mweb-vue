@@ -46,7 +46,7 @@
                     </CCol>
                     <CCol md="3">
                       <div class="filter-item">
-                        <label>Subproducto:</label>
+                        <label>Proveedor:</label>
                         <select v-model="filtros.proveedor" @change="filtrarSubproductos" class="form-select">
                           <option value="">Todos</option>
                           <option v-for="proveedor in [...new Set(subproductos.map(p => p.proveedor))]" :key="proveedor"

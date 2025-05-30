@@ -4,13 +4,6 @@ export default [
     component: 'CNavTitle',
     name: 'Negocio',
   },
-  {
-    component: 'CNavItem',
-    name: 'Perfil de Negocio',
-    to: '/negocio/perfil',
-    icon: 'fas fa-briefcase', // Icono de negocio
-  },
-
 
   {
     component: 'CNavItem',
